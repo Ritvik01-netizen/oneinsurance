@@ -1166,8 +1166,8 @@ try{if(sessionStorage.getItem('oi_gate')==='1')document.getElementById('gate').c
 
 /* ═══════════ SUPABASE ACCOUNTS ═══════════ */
 /* Paste your Supabase project URL + anon public key below, then redeploy. */
-const SB_URL='YOUR_SUPABASE_URL';        /* e.g. https://abcd1234.supabase.co */
-const SB_KEY='YOUR_SUPABASE_ANON_KEY';   /* Settings → API → anon public key  */
+const SB_URL='https://suxhfgwffnpnxjfbdqzc.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1eGhmZ3dmZm5wbnhqZmJkcXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwNzU4OTcsImV4cCI6MjEwMDY1MTg5N30.wdENaAL_arNzsk6y_Vkk2jLUuQd2UZZDVzXuwKo_4lg';
 let sb=null, sbUser=null, sbProfile=null, authMode='in';
 try{ if(!SB_URL.startsWith('YOUR') && window.supabase){ sb=window.supabase.createClient(SB_URL,SB_KEY); } }catch(e){}
 

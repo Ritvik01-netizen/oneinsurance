@@ -455,6 +455,51 @@ body.dark .btn-cmp-go{background:var(--teal);}
 .dp-input input{flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:13px;outline:none;background:var(--card);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;}
 .dp-input button{background:var(--teal);color:#fff;border:none;border-radius:12px;padding:0 16px;font-size:16px;cursor:pointer;}
 
+/* ═══ DIGITAL GLOVEBOX / VIGNETTE ═══ */
+.glove-wrap{margin-bottom:1.2rem;}
+.glove-head{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+.glove-head h3{font-size:17px;font-weight:700;}
+.glove-badge{background:rgba(255,193,69,0.16);color:#A16E00;font-size:9.5px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:1px;}
+body.dark .glove-badge{color:var(--gold);}
+.glove-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:1.2rem;}
+.vignette{background:linear-gradient(150deg,#032A3A,#0A5C6E);border-radius:20px;padding:1.4rem;color:#fff;position:relative;overflow:hidden;border:2px solid var(--gold);}
+.vignette::before{content:'';position:absolute;inset:6px;border:1.5px dashed rgba(255,255,255,0.25);border-radius:14px;pointer-events:none;}
+.vignette::after{content:'🇲🇺';position:absolute;top:12px;right:14px;font-size:20px;}
+.vg-top{display:flex;align-items:center;gap:9px;margin-bottom:0.9rem;}
+.vg-title{font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);}
+.vg-sub{font-size:9.5px;opacity:.7;letter-spacing:0.5px;}
+.vg-body{display:flex;gap:1rem;align-items:center;}
+.vg-fields{flex:1;min-width:0;}
+.vg-row{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.12);}
+.vg-row span{opacity:.65;}
+.vg-row b{font-family:'Space Grotesk',sans-serif;text-align:right;}
+.vg-reg{font-size:17px !important;color:var(--gold);}
+.vg-qr{background:#fff;border-radius:12px;padding:7px;width:96px;height:96px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.vg-qr img,.vg-qr canvas{width:82px !important;height:82px !important;display:block;}
+.vg-valid{margin-top:0.8rem;background:rgba(6,214,160,0.15);border:1px solid rgba(6,214,160,0.45);border-radius:10px;padding:7px 10px;font-size:11px;font-weight:800;color:#7CF2CF;text-align:center;letter-spacing:0.5px;}
+.vg-actions{display:flex;gap:8px;margin-top:0.9rem;}
+.vg-btn{flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:10px;padding:9px 6px;font-size:11px;font-weight:800;cursor:pointer;}
+.vg-btn.gold{background:var(--gold);color:#3A2B00;border-color:var(--gold);}
+/* compliance tiles */
+.comp-col{display:flex;flex-direction:column;gap:10px;}
+.comp-tile{background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:0.9rem 1rem;display:flex;align-items:center;gap:12px;}
+.comp-tile.warn{border-color:rgba(255,193,69,0.6);}
+.comp-tile.ok{border-color:rgba(6,214,160,0.5);}
+.comp-ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.comp-tile b{font-size:13px;display:block;}
+.comp-tile .cm{font-size:11px;color:var(--muted);line-height:1.5;}
+.comp-status{margin-left:auto;font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+.comp-status.ok{background:rgba(6,214,160,0.12);color:var(--green);}
+.comp-status.warn{background:rgba(255,193,69,0.16);color:#A16E00;}
+body.dark .comp-status.warn{color:var(--gold);}
+.comp-note{font-size:10.5px;color:var(--muted);line-height:1.55;background:rgba(14,149,148,0.07);border:1px dashed rgba(14,149,148,0.35);border-radius:11px;padding:9px 11px;}
+/* fullscreen vignette */
+#vg-full{position:fixed;inset:0;background:#032A3A;z-index:1500;display:none;align-items:center;justify-content:center;padding:1.2rem;}
+#vg-full.on{display:flex;}
+#vg-full .vignette{max-width:430px;width:100%;transform:scale(1.04);}
+#vg-full .vg-close{position:absolute;top:18px;right:18px;background:rgba(255,255,255,0.12);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2;}
+@media(max-width:960px){.glove-grid{grid-template-columns:1fr;}}
+
 /* ═══ ACCESS GATE ═══ */
 #gate{position:fixed;inset:0;background:linear-gradient(150deg,#032A3A 0%,#07485C 45%,#0E9594 130%);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
 #gate.off{display:none;}
@@ -918,6 +963,7 @@ body.dark .btn-cmp-go{background:var(--teal);}
       <button class="btn-cmp-clear" onclick="showToast('✏️ Profile editor opens here')">Edit Profile</button>
     </div>
     <div id="renewal-alerts"></div>
+    <div id="glovebox"></div>
     <div class="dash-stats">
       <div class="ds-cell"><div class="ds-num" id="d-count">0</div><div class="ds-lbl">Active Policies</div></div>
       <div class="ds-cell"><div class="ds-num" id="d-premium" style="color:var(--green);">MUR 0</div><div class="ds-lbl">Monthly Premiums</div></div>
@@ -1042,6 +1088,37 @@ body.dark .btn-cmp-go{background:var(--teal);}
   </div>
 </div>
 
+<!-- fullscreen vignette (roadside check mode) -->
+<div id="vg-full" onclick="if(event.target===this)this.classList.remove('on')">
+  <button class="vg-close" onclick="document.getElementById('vg-full').classList.remove('on')">✕</button>
+  <div id="vg-full-inner" style="width:100%;max-width:430px;"></div>
+</div>
+
+<!-- accident helper modal -->
+<div class="overlay" id="acc-ov" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="modal">
+    <div class="modal-head"><div><h3>🚨 Accident Helper</h3><p>Step-by-step — what to do after a road accident in Mauritius</p></div><button class="m-close" onclick="document.getElementById('acc-ov').classList.remove('on')">✕</button></div>
+    <div class="modal-body">
+      <div class="m-sec"><h4>Emergency numbers</h4>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;">
+          <div style="background:var(--bg);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:20px;">🚓</div><b style="font-size:16px;font-family:'Space Grotesk',sans-serif;">999</b><div style="font-size:10px;color:var(--muted);font-weight:700;">Police</div></div>
+          <div style="background:var(--bg);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:20px;">🚑</div><b style="font-size:16px;font-family:'Space Grotesk',sans-serif;">114</b><div style="font-size:10px;color:var(--muted);font-weight:700;">SAMU Ambulance</div></div>
+          <div style="background:var(--bg);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:20px;">🚒</div><b style="font-size:16px;font-family:'Space Grotesk',sans-serif;">995</b><div style="font-size:10px;color:var(--muted);font-weight:700;">Fire Services</div></div>
+        </div>
+      </div>
+      <div class="m-sec"><h4>At the scene — do this in order</h4>
+        <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Stop safely, hazard lights on. Check everyone is OK — call 114 if anyone is hurt</div>
+        <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Injuries or dispute? Call Police 999 and don't move the vehicles</div>
+        <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Photograph everything: positions, damage, number plates, road marks, the other driver's vignette</div>
+        <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Exchange details: name, NID, phone, insurer + policy number (show your Digital Vignette)</div>
+        <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Minor accident, no injuries, both agree? Fill an agreed statement (constat à l'amiable) together</div>
+        <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Report to your insurer within 24–48h — or file right here in the Claims Centre</div>
+      </div>
+      <button class="btn-pay" onclick="document.getElementById('acc-ov').classList.remove('on');showPage('claims')">📋 File my claim now</button>
+    </div>
+  </div>
+</div>
+
 <!-- quiz modal -->
 <div class="overlay" id="quiz-ov" onclick="if(event.target===this)this.classList.remove('on')">
   <div class="modal">
@@ -1050,6 +1127,7 @@ body.dark .btn-cmp-go{background:var(--teal);}
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 /* ═══════════ ACCESS GATE ═══════════ */
 const GATE_KEY='VGVzdDEyMw=='; /* access code (base64) */
@@ -1328,6 +1406,10 @@ const DODO_BRAIN=[
   {k:['schengen','visa','europe','travel','vwayaz'],r:'✈️ For a Schengen visa you need at least EUR 30,000 medical cover. Our SICOM Voyage plan (MUR 500/trip) is Schengen-compliant and visa-application-ready.'},
   {k:['health','sante','lasante','medical'],r:'🏥 Health plans start at MUR 299/mo. Key things to compare: cashless clinic network, waiting periods, maternity cover and whether Réunion evacuation is included. Try the health wizard!'},
   {k:['points','dodo points','reward'],r:'🪙 Dodo Points: 500 free at signup, +250 per policy bought, +200 for a 5/5 quiz score, +300 per friend referred. Redeem against premiums, top-ups or fuel vouchers!'},
+  {k:['vignette','disc','sticker','windscreen'],r:'📱 Your Vignette Digitale lives in Mon Compte → Digital Glovebox. It shows your reg, insurer, policy number and a QR code anyone can scan to verify your cover — perfect for roadside checks, plus a printable windscreen sticker.'},
+  {k:['road tax','declaration','deklarasion','nta'],r:'🧾 Road tax (the "declaration") is paid at the post office for 3, 6 or 12 months — but you need a VALID insurance certificate and fitness certificate to pay it. More than 15 days late = 50% fine! Your Digital Glovebox tracks all three deadlines.'},
+  {k:['fitness','examination','contre visite'],r:'🔧 Cars older than 3 years need a Certificate of Fitness from an official examination centre, renewed yearly. No fitness = no road tax = not road legal. We track your test date in the Digital Glovebox.'},
+  {k:['accident','aksidan','collision','constat'],r:'🚨 After an accident: 1) safety first, call 114 if injured, 2) Police 999 if injuries/dispute, 3) photograph everything, 4) exchange details (show your Digital Vignette!), 5) report within 24–48h via our Claims Centre. Open Mon Compte → 🚨 Accident Helper for the full checklist.'},
   {k:['bonjour','hello','hi','salam','bonzour'],r:'🦤 Bonzour! Mo Dodo, ou assistant lasirans. Ask me about cyclone cover, excess, NCB, Schengen visas, payments — in English, français ou Kreol!'},
   {k:['prep'],r:'🌀 Opening the Cyclone Prep Centre for you…',act:'cyclone'},
 ];
@@ -1607,7 +1689,7 @@ function completePurchase(){
   const I=INSURERS[selectedDeal.ins];
   const num='OI-2026-'+Math.floor(100000+Math.random()*900000);
   const renew=new Date();renew.setFullYear(renew.getFullYear()+1);
-  userPolicies.push({id:num,name:selectedDeal.name,ins:I,price:selectedDeal.price,renews:renew.toLocaleDateString('en-GB',{month:'short',year:'numeric'})});
+  userPolicies.push({id:num,name:selectedDeal.name,ins:I,price:selectedDeal.price,renews:renew.toLocaleDateString('en-GB',{month:'short',year:'numeric'}),type:wizProduct,reg:wizAnswers.reg||null,model:wizAnswers.model||null,cover:selectedDeal.cover});
   dodoPoints+=250;
   document.getElementById('success-summary').innerHTML=`
     <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--muted);">Policy number</span><b>${num}</b></div>
@@ -1624,7 +1706,10 @@ function renderDashboard(){
   if(!userPolicies.some(p=>p.demo)){
     const d=new Date();d.setDate(d.getDate()+11);
     userPolicies.unshift({id:'OI-2026-004411',name:'HomeSafe All Perils',ins:INSURERS[0],price:1800,renews:d.toLocaleDateString('en-GB',{month:'short',year:'numeric'}),demo:true,daysLeft:11});
+    const m=new Date();m.setMonth(m.getMonth()+9);
+    userPolicies.unshift({id:'OI-2026-007782',name:'AutoShield Comprehensive',ins:INSURERS[0],price:3200,renews:m.toLocaleDateString('en-GB',{month:'short',year:'numeric'}),demo:true,type:'motor',reg:'1234 AB 25',model:'Toyota Vitz',cover:'Comprehensive',validUntil:m});
   }
+  renderGlovebox();
   document.getElementById('d-count').textContent=userPolicies.length;
   document.getElementById('d-premium').textContent='MUR '+userPolicies.reduce((s,p)=>s+p.price,0).toLocaleString();
   document.getElementById('d-points').textContent=dodoPoints.toLocaleString();
@@ -1650,6 +1735,72 @@ function renderDashboard(){
         <p style="font-size:11px;color:var(--coral);margin:4px;">💡 We automatically re-compare the whole market at renewal — you always get the best current price.</p>
       </div>
     </div>`:'';
+}
+
+/* ═══════════ DIGITAL GLOVEBOX / VIGNETTE ═══════════ */
+function vgHTML(p,big){
+  const until=p.renews||'—';
+  return `<div class="vignette">
+    <div class="vg-top"><div class="brand-mark" style="width:34px;height:34px;font-size:17px;">🦤</div>
+      <div><div class="vg-title">Vignette Digitale</div><div class="vg-sub">Digital Insurance Disc · Republic of Mauritius</div></div></div>
+    <div class="vg-body">
+      <div class="vg-fields">
+        <div class="vg-row"><span>Vehicle</span><b class="vg-reg">${p.reg||'—'}</b></div>
+        <div class="vg-row"><span>Model</span><b>${p.model||'—'}</b></div>
+        <div class="vg-row"><span>Insurer</span><b>${p.ins.name}</b></div>
+        <div class="vg-row"><span>Cover</span><b>${p.cover||'Comprehensive'}</b></div>
+        <div class="vg-row"><span>Policy N°</span><b>${p.id}</b></div>
+      </div>
+      <div class="vg-qr"><div id="${big?'vg-qr-big':'vg-qr-'+p.id}"></div></div>
+    </div>
+    <div class="vg-valid">✓ COVER IN FORCE · VALID UNTIL ${String(until).toUpperCase()}</div>
+    ${big?'':`<div class="vg-actions">
+      <button class="vg-btn gold" onclick="openVgFull('${p.id}')">📱 Roadside check mode</button>
+      <button class="vg-btn" onclick="showToast('🖨️ Vignette PDF downloading — print & stick on your windscreen')">🖨️ Print sticker</button>
+      <button class="vg-btn" onclick="showToast('📲 Vignette sent to your WhatsApp')">📲 WhatsApp</button>
+    </div>`}
+  </div>`;
+}
+function drawQR(elId,p){
+  const el=document.getElementById(elId);if(!el)return;
+  el.innerHTML='';
+  try{ new QRCode(el,{text:'https://oneinsurance.mu/verify?p='+encodeURIComponent(p.id)+'&reg='+encodeURIComponent(p.reg||''),width:82,height:82,correctLevel:QRCode.CorrectLevel.M}); }
+  catch(e){ el.innerHTML='<div style="font-size:9px;color:#333;text-align:center;font-weight:800;">VERIFY<br>'+p.id+'</div>'; }
+}
+function renderGlovebox(){
+  const box=document.getElementById('glovebox');
+  const motor=userPolicies.find(p=>p.type==='motor');
+  if(!motor){box.innerHTML='';return;}
+  const today=new Date();
+  const roadTax=new Date(today);roadTax.setDate(roadTax.getDate()+23);
+  const fitness=new Date(today);fitness.setMonth(fitness.getMonth()+4);
+  const fmt=d=>d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  box.innerHTML=`<div class="co-card glove-wrap">
+    <div class="glove-head"><h3>🧤 Digital Glovebox</h3><span class="glove-badge">MORIS EXCLUSIVE</span>
+      <button class="btn-cmp-clear" style="margin-left:auto;padding:8px 14px;font-size:11.5px;" onclick="document.getElementById('acc-ov').classList.add('on')">🚨 Accident Helper</button></div>
+    <div class="glove-grid">
+      <div>${vgHTML(motor,false)}</div>
+      <div class="comp-col">
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Road-legal tracker</div>
+        <div class="comp-tile ok"><div class="comp-ico" style="background:rgba(6,214,160,0.14);">🛡️</div>
+          <div><b>Insurance</b><div class="cm">${motor.name} · renews ${motor.renews}</div></div>
+          <span class="comp-status ok">✓ In force</span></div>
+        <div class="comp-tile warn"><div class="comp-ico" style="background:rgba(255,193,69,0.18);">🧾</div>
+          <div><b>Road Tax (Declaration)</b><div class="cm">Due ${fmt(roadTax)} · pay at any post office — needs your valid insurance certificate</div></div>
+          <span class="comp-status warn">⏰ 23 days</span></div>
+        <div class="comp-tile ok"><div class="comp-ico" style="background:rgba(14,149,148,0.12);">🔧</div>
+          <div><b>Certificate of Fitness</b><div class="cm">Required yearly for cars over 3 years · next test ${fmt(fitness)}</div></div>
+          <span class="comp-status ok">✓ Valid</span></div>
+        <div class="comp-note">💡 <b>Why this matters:</b> in Mauritius you can't renew your road tax without a valid insurance certificate &amp; fitness — and paying more than 15 days late brings a 50% fine. We remind you before every deadline by SMS &amp; WhatsApp.</div>
+      </div>
+    </div></div>`;
+  drawQR('vg-qr-'+motor.id,motor);
+}
+function openVgFull(pid){
+  const p=userPolicies.find(x=>x.id===pid);if(!p)return;
+  document.getElementById('vg-full-inner').innerHTML=vgHTML(p,true);
+  document.getElementById('vg-full').classList.add('on');
+  drawQR('vg-qr-big',p);
 }
 
 /* ═══════════ CLAIMS ═══════════ */

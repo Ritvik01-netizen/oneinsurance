@@ -455,6 +455,19 @@ body.dark .btn-cmp-go{background:var(--teal);}
 .dp-input input{flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:13px;outline:none;background:var(--card);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;}
 .dp-input button{background:var(--teal);color:#fff;border:none;border-radius:12px;padding:0 16px;font-size:16px;cursor:pointer;}
 
+/* ═══ ACCESS GATE ═══ */
+#gate{position:fixed;inset:0;background:linear-gradient(150deg,#032A3A 0%,#07485C 45%,#0E9594 130%);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
+#gate.off{display:none;}
+.gate-card{background:#fff;border-radius:26px;padding:2.6rem 2.2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,0.4);color:#062A3A;}
+.gate-card .g-emoji{font-size:52px;display:block;margin-bottom:0.8rem;animation:float 3.4s ease-in-out infinite;}
+.gate-card h2{font-size:23px;font-weight:700;margin-bottom:6px;letter-spacing:-0.5px;}
+.gate-card p{font-size:13px;color:#5B7484;line-height:1.6;margin-bottom:1.4rem;}
+.gate-card input{width:100%;padding:15px 16px;border:1.5px solid #DBE9E6;border-radius:13px;font-size:16px;text-align:center;letter-spacing:3px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:#062A3A;}
+.gate-card input:focus{border-color:#0E9594;box-shadow:0 0 0 3px rgba(14,149,148,0.15);}
+.gate-card button{width:100%;margin-top:12px;background:linear-gradient(135deg,#FF6B5E,#F04E42);color:#fff;border:none;padding:15px;border-radius:13px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(240,78,66,0.35);}
+.gate-err{color:#F04E42;font-size:12px;font-weight:700;margin-top:10px;min-height:16px;}
+.gate-foot{font-size:10.5px;color:#8FA5B0;margin-top:1.2rem;}
+
 /* confetti */
 .confetti{position:fixed;top:-12px;font-size:18px;z-index:998;animation:confFall linear forwards;pointer-events:none;}
 @keyframes confFall{to{transform:translateY(105vh) rotate(720deg);opacity:.6;}}
@@ -482,6 +495,19 @@ body.dark .btn-cmp-go{background:var(--teal);}
 </style>
 </head>
 <body>
+
+<!-- ACCESS GATE -->
+<div id="gate">
+  <div class="gate-card">
+    <span class="g-emoji">🦤</span>
+    <h2>Private Preview</h2>
+    <p>OneInsurance is in invite-only preview.<br>Enter your access code to continue.</p>
+    <input id="gate-in" type="password" placeholder="••••••••" autocomplete="off" onkeydown="if(event.key==='Enter')gateTry()">
+    <button onclick="gateTry()">🔓 Unlock</button>
+    <div class="gate-err" id="gate-err"></div>
+    <div class="gate-foot">🔒 Authorised testers only · OneInsurance Mauritius</div>
+  </div>
+</div>
 
 <div id="toast"></div>
 <button id="wa-float" onclick="showToast('💬 WhatsApp support: +230 5XXX XXXX')" title="WhatsApp">💬</button>
@@ -1025,6 +1051,21 @@ body.dark .btn-cmp-go{background:var(--teal);}
 </div>
 
 <script>
+/* ═══════════ ACCESS GATE ═══════════ */
+const GATE_KEY='VGVzdDEyMw=='; /* access code (base64) */
+function gateTry(){
+  const v=document.getElementById('gate-in').value;
+  if(btoa(v)===GATE_KEY){
+    try{sessionStorage.setItem('oi_gate','1');}catch(e){}
+    document.getElementById('gate').classList.add('off');
+  }else{
+    document.getElementById('gate-err').textContent='❌ Wrong code — try again';
+    document.getElementById('gate-in').value='';
+    document.getElementById('gate-in').focus();
+  }
+}
+try{if(sessionStorage.getItem('oi_gate')==='1')document.getElementById('gate').classList.add('off');}catch(e){}
+
 /* ═══════════ DATA ═══════════ */
 const INSURERS = [
   {code:'SWAN', name:'Swan Insurance', color:'#0B3C6E'},

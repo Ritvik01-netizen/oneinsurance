@@ -1088,6 +1088,25 @@ body.dark .comp-status.warn{color:var(--gold);}
   </div>
 </div>
 
+<!-- auth modal (sign in / create account) -->
+<div class="overlay" id="auth-ov" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-head"><div><h3>🦤 Mon Compte</h3><p id="auth-sub">Sign in — or create your free account in 20 seconds</p></div><button class="m-close" onclick="document.getElementById('auth-ov').classList.remove('on')">✕</button></div>
+    <div class="modal-body">
+      <div style="display:flex;border:1.5px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:1.2rem;">
+        <button id="auth-tab-in" onclick="authTab('in')" style="flex:1;padding:12px;font-size:13px;font-weight:800;border:none;background:var(--deep);color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Sign in</button>
+        <button id="auth-tab-up" onclick="authTab('up')" style="flex:1;padding:12px;font-size:13px;font-weight:800;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Create account</button>
+      </div>
+      <div class="wiz-field" id="auth-name-f" style="display:none;"><label>Your name</label><input id="auth-name" type="text" placeholder="Ravi Boodhoo"></div>
+      <div class="wiz-field"><label>Email</label><input id="auth-email" type="email" placeholder="you@email.com"></div>
+      <div class="wiz-field"><label>Password</label><input id="auth-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authGo()"></div>
+      <button class="btn-pay" id="auth-go" onclick="authGo()">Sign in →</button>
+      <div class="gate-err" id="auth-err" style="text-align:center;"></div>
+      <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px;">🔒 Your data is encrypted &amp; stored securely. Free forever — no card needed.</p>
+    </div>
+  </div>
+</div>
+
 <!-- fullscreen vignette (roadside check mode) -->
 <div id="vg-full" onclick="if(event.target===this)this.classList.remove('on')">
   <button class="vg-close" onclick="document.getElementById('vg-full').classList.remove('on')">✕</button>
@@ -1128,6 +1147,7 @@ body.dark .comp-status.warn{color:var(--gold);}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 /* ═══════════ ACCESS GATE ═══════════ */
 const GATE_KEY='VGVzdDEyMw=='; /* access code (base64) */
@@ -1143,6 +1163,84 @@ function gateTry(){
   }
 }
 try{if(sessionStorage.getItem('oi_gate')==='1')document.getElementById('gate').classList.add('off');}catch(e){}
+
+/* ═══════════ SUPABASE ACCOUNTS ═══════════ */
+/* Paste your Supabase project URL + anon public key below, then redeploy. */
+const SB_URL='YOUR_SUPABASE_URL';        /* e.g. https://abcd1234.supabase.co */
+const SB_KEY='YOUR_SUPABASE_ANON_KEY';   /* Settings → API → anon public key  */
+let sb=null, sbUser=null, sbProfile=null, authMode='in';
+try{ if(!SB_URL.startsWith('YOUR') && window.supabase){ sb=window.supabase.createClient(SB_URL,SB_KEY); } }catch(e){}
+
+function openAuth(){document.getElementById('auth-ov').classList.add('on');}
+function authTab(m){
+  authMode=m;
+  document.getElementById('auth-name-f').style.display=m==='up'?'block':'none';
+  document.getElementById('auth-go').textContent=m==='up'?'Create my account →':'Sign in →';
+  const ti=document.getElementById('auth-tab-in'),tu=document.getElementById('auth-tab-up');
+  ti.style.background=m==='in'?'var(--deep)':'transparent';ti.style.color=m==='in'?'#fff':'var(--muted)';
+  tu.style.background=m==='up'?'var(--deep)':'transparent';tu.style.color=m==='up'?'#fff':'var(--muted)';
+  document.getElementById('auth-err').textContent='';
+}
+async function authGo(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  const err=document.getElementById('auth-err');
+  if(!email||!pass){err.textContent='Please fill in email and password';return;}
+  err.textContent='';document.getElementById('auth-go').textContent='⏳ Please wait…';
+  try{
+    if(authMode==='up'){
+      const name=document.getElementById('auth-name').value.trim()||email.split('@')[0];
+      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
+      if(error)throw error;
+      if(data.user&&!data.session){err.style.color='var(--green)';err.textContent='✅ Account created! Check your email to confirm, then sign in.';authTab('in');return;}
+      sbUser=data.user;
+    }else{
+      const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+      sbUser=data.user;
+    }
+    await loadUserData();
+    document.getElementById('auth-ov').classList.remove('on');
+    showToast('🦤 Bonzour '+(sbProfile&&sbProfile.name?sbProfile.name.split(' ')[0]:'')+'! Welcome to your account');
+    showPage('account');
+  }catch(e){err.style.color='var(--coral)';err.textContent='❌ '+(e.message||'Something went wrong');}
+  finally{authTab(authMode);}
+}
+async function sbSignOut(){
+  try{await sb.auth.signOut();}catch(e){}
+  sbUser=null;sbProfile=null;userPolicies.length=0;userClaims.length=0;dodoPoints=750;
+  showToast('👋 Signed out — a revoir!');showPage('home');
+}
+async function loadUserData(){
+  if(!sb||!sbUser)return;
+  try{
+    let {data:prof}=await sb.from('profiles').select('*').eq('id',sbUser.id).maybeSingle();
+    if(!prof){
+      const name=(sbUser.user_metadata&&sbUser.user_metadata.name)||sbUser.email.split('@')[0];
+      await sb.from('profiles').insert({id:sbUser.id,name,points:500});
+      prof={id:sbUser.id,name,points:500};
+      showToast('🪙 +500 Dodo Points — welcome bonus!');
+    }
+    sbProfile=prof;dodoPoints=prof.points||0;
+    const {data:pols}=await sb.from('policies').select('*').order('created_at',{ascending:false});
+    userPolicies.length=0;
+    (pols||[]).forEach(r=>{
+      const ins=INSURERS.find(i=>i.code===r.insurer)||INSURERS[0];
+      userPolicies.push({id:r.id,name:r.name,ins,price:r.price,renews:r.renews,type:r.type,reg:r.reg,model:r.model,cover:r.cover});
+    });
+    const {data:cls}=await sb.from('claims').select('*').order('created_at',{ascending:false});
+    userClaims.length=0;
+    (cls||[]).forEach(r=>{
+      const ins=INSURERS.find(i=>i.code===r.insurer)||INSURERS[0];
+      userClaims.push({ref:r.ref,policy:r.policy,ins,type:r.type,amount:r.amount,date:new Date(r.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),status:r.status||0,desc:r.descr});
+    });
+  }catch(e){console.warn('loadUserData',e);}
+}
+async function sbRestoreSession(){
+  if(!sb)return;
+  try{const {data}=await sb.auth.getSession(); if(data&&data.session){sbUser=data.session.user;await loadUserData();}}catch(e){}
+}
+sbRestoreSession();
 
 /* ═══════════ DATA ═══════════ */
 const INSURERS = [
@@ -1691,6 +1789,10 @@ function completePurchase(){
   const renew=new Date();renew.setFullYear(renew.getFullYear()+1);
   userPolicies.push({id:num,name:selectedDeal.name,ins:I,price:selectedDeal.price,renews:renew.toLocaleDateString('en-GB',{month:'short',year:'numeric'}),type:wizProduct,reg:wizAnswers.reg||null,model:wizAnswers.model||null,cover:selectedDeal.cover});
   dodoPoints+=250;
+  if(sb&&sbUser){
+    sb.from('policies').insert({id:num,user_id:sbUser.id,name:selectedDeal.name,insurer:I.code,price:selectedDeal.price,renews:renew.toLocaleDateString('en-GB',{month:'short',year:'numeric'}),type:wizProduct,reg:wizAnswers.reg||null,model:wizAnswers.model||null,cover:selectedDeal.cover}).then(()=>{});
+    sb.from('profiles').update({points:dodoPoints}).eq('id',sbUser.id).then(()=>{});
+  }
   document.getElementById('success-summary').innerHTML=`
     <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--muted);">Policy number</span><b>${num}</b></div>
     <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--muted);">Plan</span><b>${selectedDeal.name}</b></div>
@@ -1703,7 +1805,14 @@ function completePurchase(){
 
 /* ═══════════ DASHBOARD ═══════════ */
 function renderDashboard(){
-  if(!userPolicies.some(p=>p.demo)){
+  if(sbUser){
+    document.getElementById('d-name').textContent=(sbProfile&&sbProfile.name)||sbUser.email;
+    document.getElementById('d-mail').textContent=sbUser.email;
+    document.getElementById('d-avi').textContent=((sbProfile&&sbProfile.name)||sbUser.email).split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const eb=document.querySelector('#page-account .dash-head .btn-cmp-clear');
+    if(eb){eb.textContent='👋 Sign out';eb.onclick=sbSignOut;}
+  }
+  if(!sbUser&&!userPolicies.some(p=>p.demo)){
     const d=new Date();d.setDate(d.getDate()+11);
     userPolicies.unshift({id:'OI-2026-004411',name:'HomeSafe All Perils',ins:INSURERS[0],price:1800,renews:d.toLocaleDateString('en-GB',{month:'short',year:'numeric'}),demo:true,daysLeft:11});
     const m=new Date();m.setMonth(m.getMonth()+9);
@@ -1820,7 +1929,11 @@ function claimTab(tab){
   if(tab==='file')renderClaimPolicies();
 }
 function renderClaimPolicies(){
-  if(!userPolicies.length){
+  if(sbUser&&!userPolicies.length){
+    document.getElementById('cl-policy-list').innerHTML='<p style="font-size:13px;color:var(--muted);">You don\'t have any policies yet — <a style="color:var(--teal);font-weight:800;cursor:pointer;" onclick="startWizard(\'motor\')">compare &amp; buy one first</a>.</p>';
+    return;
+  }
+  if(!sbUser&&!userPolicies.length){
     const d=new Date();d.setDate(d.getDate()+11);
     userPolicies.push({id:'OI-2026-004411',name:'HomeSafe All Perils',ins:INSURERS[0],price:1800,renews:d.toLocaleDateString('en-GB',{month:'short',year:'numeric'}),demo:true,daysLeft:11});
   }
@@ -1845,6 +1958,7 @@ function submitClaim(){
   const amt=parseInt(document.getElementById('cl-amount').value)||0;
   const desc=document.getElementById('cl-desc').value||claimType;
   userClaims.unshift({ref,policy:p.name,ins:p.ins,type:claimType,amount:amt,date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),status:0,desc});
+  if(sb&&sbUser){sb.from('claims').insert({ref,user_id:sbUser.id,policy:p.name,insurer:p.ins.code,type:claimType,amount:amt,descr:desc,status:0}).then(()=>{});}
   claimType=null;claimPolicy=null;
   showToast('✅ Claim '+ref+' submitted! Advisor will call within 24h');
   claimTab('track');
@@ -1951,6 +2065,7 @@ function setLang(code){
 
 /* ═══════════ CORE ═══════════ */
 function showPage(name){
+  if(name==='account'&&sb&&!sbUser){openAuth();return;}
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   window.scrollTo(0,0);

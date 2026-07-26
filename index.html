@@ -1192,7 +1192,14 @@ async function authGo(){
       const name=document.getElementById('auth-name').value.trim()||email.split('@')[0];
       const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
       if(error)throw error;
-      if(data.user&&!data.session){err.style.color='var(--green)';err.textContent='✅ Account created! Check your email to confirm, then sign in.';authTab('in');return;}
+      if(data.user&&!data.session){
+        err.style.color='var(--green)';
+        err.innerHTML='✅ Account created!<br>📧 We\'ve sent a confirmation link to <b>'+email+'</b> — click it (check spam too), then come back and sign in.';
+        authTab('in');
+        document.getElementById('auth-err').style.color='var(--green)';
+        document.getElementById('auth-err').innerHTML='✅ Account created!<br>📧 Confirmation link sent to <b>'+email+'</b> — click it (check spam too), then sign in here.';
+        return;
+      }
       sbUser=data.user;
     }else{
       const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
@@ -1203,8 +1210,22 @@ async function authGo(){
     document.getElementById('auth-ov').classList.remove('on');
     showToast('🦤 Bonzour '+(sbProfile&&sbProfile.name?sbProfile.name.split(' ')[0]:'')+'! Welcome to your account');
     showPage('account');
-  }catch(e){err.style.color='var(--coral)';err.textContent='❌ '+(e.message||'Something went wrong');}
-  finally{authTab(authMode);}
+  }catch(e){
+    const msg=e.message||'Something went wrong';
+    err.style.color='var(--coral)';
+    if(/not confirmed/i.test(msg)){
+      err.innerHTML='📧 Your email isn\'t confirmed yet — click the link in the email we sent you (check spam!).<br><button onclick="resendConfirm()" style="margin-top:8px;background:none;border:1.5px solid var(--teal);color:var(--teal);border-radius:9px;padding:7px 14px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:\'Plus Jakarta Sans\',sans-serif;">↻ Resend confirmation email</button>';
+    }else if(/invalid login credentials/i.test(msg)){
+      err.textContent='❌ Wrong email or password — or you haven\'t created an account yet (use the "Create account" tab).';
+    }else{err.textContent='❌ '+msg;}
+  }
+  finally{document.getElementById('auth-go').textContent=authMode==='up'?'Create my account →':'Sign in →';}
+}
+async function resendConfirm(){
+  const email=document.getElementById('auth-email').value.trim();
+  if(!email){showToast('⚠️ Type your email above first');return;}
+  try{await sb.auth.resend({type:'signup',email});showToast('📧 Confirmation email re-sent to '+email);}
+  catch(e){showToast('❌ '+(e.message||'Could not resend'));}
 }
 async function sbSignOut(){
   try{await sb.auth.signOut();}catch(e){}

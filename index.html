@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneInsurance — Moris Konpar · Compare Every Insurer in Mauritius &amp; Save</title>
+<meta name="description" content="Mauritius's smartest insurance comparison platform. Compare 15+ insurers for motor, health, life, travel, home & business. Cyclone-ready cover, trilingual, pay with Juice, Blink or MyT Money.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F3FAF8;--card:#ffffff;--ink:#062A3A;--muted:#5B7484;--border:#DBE9E6;
+  --teal:#0E9594;--teal2:#12B5B0;--deep:#032A3A;--deep2:#0A5C6E;
+  --coral:#FF6B5E;--coral2:#F04E42;--gold:#FFC145;--green:#06D6A0;--lav:#7B6CF6;
+  --glass:rgba(255,255,255,0.72);--shadow:0 14px 40px rgba(4,48,63,0.10);
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+body.dark{
+  --bg:#04202C;--card:#0A3040;--ink:#EAF6F4;--muted:#8FB3BF;--border:#12495C;
+  --glass:rgba(10,48,64,0.78);--shadow:0 14px 40px rgba(0,0,0,0.4);
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ink);transition:background .3s,color .3s;}
+h1,h2,h3,h4,.brand,.display{font-family:'Space Grotesk',sans-serif;}
+button{font-family:'Plus Jakarta Sans',sans-serif;}
+.page{display:none;}
+.page.active{display:block;animation:pageIn .35s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.reveal{opacity:0;transform:translateY(26px);transition:all .7s cubic-bezier(.2,.7,.3,1);}
+.reveal.vis{opacity:1;transform:none;}
+
+/* ═══ CYCLONE TICKER ═══ */
+#cyc-bar{background:linear-gradient(90deg,#062A3A,#0A5C6E);color:#CFF3EE;font-size:12.5px;font-weight:600;padding:8px 16px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;position:relative;z-index:600;}
+#cyc-bar .pulse{width:9px;height:9px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite;flex-shrink:0;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(6,214,160,.6);}70%{box-shadow:0 0 0 9px rgba(6,214,160,0);}100%{box-shadow:0 0 0 0 rgba(6,214,160,0);}}
+#cyc-bar b{color:#fff;}
+#cyc-bar .cyc-cta{color:var(--gold);text-decoration:underline;font-weight:700;}
+
+/* ═══ NAV ═══ */
+nav{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 max(1.5rem,calc((100% - 1200px)/2));position:sticky;top:0;z-index:500;border-bottom:1px solid var(--border);}
+.brand{display:flex;align-items:center;gap:11px;cursor:pointer;}
+.brand-mark{width:42px;height:42px;background:linear-gradient(135deg,var(--teal),var(--deep2));border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(14,149,148,0.35);}
+.brand-name{font-size:19.5px;font-weight:700;color:var(--ink);letter-spacing:-0.3px;}
+.brand-name b{color:var(--teal);}
+.brand-tag{font-size:8.5px;font-weight:700;color:var(--muted);letter-spacing:2px;display:block;line-height:1.3;}
+.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links a{font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer;transition:color .2s;text-decoration:none;}
+.nav-links a:hover{color:var(--teal);}
+.nav-right{display:flex;align-items:center;gap:9px;}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--ink);}
+.icon-btn:hover{border-color:var(--teal);transform:translateY(-1px);}
+#lang-sel{border:1.5px solid var(--border);border-radius:11px;padding:9px 8px;font-size:12px;font-weight:700;color:var(--ink);background:var(--card);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;outline:none;}
+.btn-nav-quote{background:linear-gradient(135deg,var(--coral),var(--coral2));color:#fff;border:none;padding:11px 20px;border-radius:12px;font-size:13.5px;font-weight:800;cursor:pointer;box-shadow:0 5px 16px rgba(255,107,94,0.4);transition:all .2s;}
+.btn-nav-quote:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(255,107,94,0.5);}
+.btn-nav-login{background:none;color:var(--ink);border:1.5px solid var(--border);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;}
+
+/* ═══ HERO ═══ */
+.hero{background:linear-gradient(150deg,#032A3A 0%,#07485C 45%,#0E9594 110%);color:#fff;padding:3.4rem 1.5rem 5.5rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(700px 340px at 85% -10%,rgba(18,181,176,0.35),transparent 65%),radial-gradient(500px 300px at -5% 110%,rgba(255,193,69,0.14),transparent 60%);}
+.hero .wave{position:absolute;bottom:-2px;left:0;width:100%;line-height:0;}
+.hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.08fr 1fr;gap:3rem;align-items:center;position:relative;z-index:2;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.22);border-radius:30px;padding:7px 15px;font-size:12px;font-weight:700;margin-bottom:1.2rem;backdrop-filter:blur(6px);}
+.hero h1{font-size:46px;font-weight:700;line-height:1.1;margin-bottom:1rem;letter-spacing:-1.2px;}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--gold),#FFDf8e);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero-sub{font-size:16px;color:rgba(255,255,255,0.85);line-height:1.65;margin-bottom:1.5rem;max-width:470px;}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:1.6rem;}
+.btn-hero{background:linear-gradient(135deg,var(--coral),var(--coral2));color:#fff;border:none;padding:16px 30px;border-radius:14px;font-size:15.5px;font-weight:800;cursor:pointer;box-shadow:0 10px 28px rgba(240,78,66,0.45);transition:all .2s;}
+.btn-hero:hover{transform:translateY(-2px) scale(1.02);}
+.btn-hero-ghost{background:rgba(255,255,255,0.08);color:#fff;border:1.5px solid rgba(255,255,255,0.35);padding:16px 28px;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;backdrop-filter:blur(4px);}
+.btn-hero-ghost:hover{background:rgba(255,255,255,0.16);}
+.hero-proof{display:flex;gap:1.7rem;flex-wrap:wrap;}
+.proof-item{font-size:12.5px;color:rgba(255,255,255,0.8);}
+.proof-num{font-weight:800;font-size:19px;color:#fff;display:block;font-family:'Space Grotesk',sans-serif;}
+.live-ticker{margin-top:1.5rem;display:inline-flex;align-items:center;gap:9px;background:rgba(6,214,160,0.12);border:1px solid rgba(6,214,160,0.35);border-radius:12px;padding:9px 14px;font-size:12.5px;font-weight:600;color:#B8F5E4;}
+.live-ticker b{color:#fff;}
+
+/* Hero selector card */
+.hero-card{background:var(--card);border-radius:24px;padding:1.7rem;box-shadow:0 30px 70px rgba(0,0,0,0.35);color:var(--ink);position:relative;}
+.hero-card::before{content:'🦤';position:absolute;top:-26px;right:22px;font-size:44px;filter:drop-shadow(0 6px 10px rgba(0,0,0,0.25));animation:float 3.4s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-9px) rotate(3deg);}}
+.hero-card h3{font-size:17px;font-weight:700;margin-bottom:4px;}
+.hero-card .hc-sub{font-size:12.5px;color:var(--muted);margin-bottom:1.1rem;}
+.product-select-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.psg-item{border:1.5px solid var(--border);border-radius:16px;padding:1rem 0.5rem;text-align:center;cursor:pointer;transition:all .18s;background:var(--card);position:relative;overflow:hidden;}
+.psg-item:hover{border-color:var(--teal);transform:translateY(-3px);box-shadow:0 10px 22px rgba(14,149,148,0.18);}
+.psg-icon{font-size:27px;margin-bottom:6px;}
+.psg-name{font-size:12.5px;font-weight:800;}
+.psg-price{font-size:10px;color:var(--green);font-weight:700;margin-top:2px;}
+.hc-foot{margin-top:1rem;text-align:center;font-size:11px;color:var(--muted);}
+
+/* ═══ INSURER MARQUEE ═══ */
+.insurer-strip{background:var(--card);border-bottom:1px solid var(--border);padding:0.95rem 0;overflow:hidden;position:relative;}
+.marquee{display:flex;gap:3rem;width:max-content;animation:marq 26s linear infinite;padding-left:1rem;}
+.insurer-strip:hover .marquee{animation-play-state:paused;}
+@keyframes marq{to{transform:translateX(-50%);}}
+.is-logo{font-size:14.5px;font-weight:700;color:var(--muted);font-family:'Space Grotesk',sans-serif;white-space:nowrap;opacity:.75;transition:all .2s;}
+.is-logo:hover{opacity:1;color:var(--teal);}
+
+/* ═══ SECTIONS ═══ */
+main{max-width:1200px;margin:0 auto;padding:3.6rem 1.5rem;}
+.sec-title{font-size:31px;font-weight:700;letter-spacing:-0.8px;margin-bottom:0.4rem;}
+.sec-sub{font-size:14.5px;color:var(--muted);margin-bottom:2rem;}
+.center{text-align:center;}
+.eyebrow{display:inline-block;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--teal);background:rgba(14,149,148,0.1);padding:6px 14px;border-radius:20px;margin-bottom:0.8rem;}
+
+/* Life moments */
+.lm-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:4rem;}
+.lm-card{border-radius:20px;padding:1.5rem 1.1rem;cursor:pointer;transition:all .25s;color:#fff;position:relative;overflow:hidden;min-height:158px;display:flex;flex-direction:column;justify-content:flex-end;}
+.lm-card::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 20%,rgba(0,0,0,0.35));}
+.lm-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 18px 40px rgba(4,48,63,0.25);}
+.lm-emoji{font-size:34px;position:absolute;top:1rem;left:1rem;z-index:2;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.3));}
+.lm-card h3{font-size:15px;font-weight:700;position:relative;z-index:2;}
+.lm-card p{font-size:11px;opacity:.9;position:relative;z-index:2;margin-top:2px;}
+
+/* How it works */
+.hiw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;margin-bottom:4rem;}
+.hiw-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1.8rem;position:relative;transition:all .25s;}
+.hiw-card:hover{box-shadow:var(--shadow);transform:translateY(-4px);border-color:var(--teal);}
+.hiw-num{position:absolute;top:1.2rem;right:1.5rem;font-size:46px;font-weight:700;color:var(--border);font-family:'Space Grotesk',sans-serif;opacity:.8;}
+.hiw-icon{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:25px;margin-bottom:1rem;}
+.hiw-card h3{font-size:16.5px;font-weight:700;margin-bottom:0.5rem;}
+.hiw-card p{font-size:13px;color:var(--muted);line-height:1.65;}
+
+/* Product cards */
+.prod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:4rem;}
+.prod-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1.5rem 1.2rem;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
+.prod-card:hover{border-color:var(--teal);box-shadow:0 16px 38px rgba(14,149,148,0.16);transform:translateY(-5px);}
+.prod-card:hover .pc-cta{color:var(--teal);gap:10px;}
+.pc-badge{position:absolute;top:12px;right:12px;background:rgba(255,193,69,0.16);color:#A16E00;font-size:9px;font-weight:800;padding:4px 9px;border-radius:20px;letter-spacing:0.5px;}
+body.dark .pc-badge{color:var(--gold);}
+.pc-badge.hot{background:rgba(255,107,94,0.14);color:var(--coral);}
+.pc-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:0.9rem;}
+.prod-card h3{font-size:15px;font-weight:700;margin-bottom:4px;}
+.pc-from{font-size:11.5px;color:var(--muted);margin-bottom:0.8rem;}
+.pc-from b{color:var(--green);font-size:12.5px;}
+.pc-cta{font-size:12px;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:6px;transition:all .2s;}
+
+/* Savings calculator */
+.calc-wrap{background:linear-gradient(135deg,var(--deep),var(--deep2));border-radius:26px;padding:2.4rem 2rem;color:#fff;display:grid;grid-template-columns:1fr 1fr;gap:2.4rem;margin-bottom:4rem;position:relative;overflow:hidden;}
+.calc-wrap::after{content:'💰';position:absolute;font-size:150px;right:-24px;bottom:-38px;opacity:.08;transform:rotate(-14deg);}
+.calc-wrap h2{font-size:26px;font-weight:700;margin-bottom:0.5rem;letter-spacing:-0.5px;}
+.calc-wrap .cw-sub{font-size:13.5px;opacity:.8;margin-bottom:1.6rem;line-height:1.6;}
+.calc-field{margin-bottom:1.2rem;}
+.calc-field label{display:block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:8px;}
+.calc-prods{display:flex;gap:8px;flex-wrap:wrap;}
+.calc-prod{background:rgba(255,255,255,0.09);border:1.5px solid rgba(255,255,255,0.22);border-radius:12px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .15s;color:#fff;}
+.calc-prod.on{background:var(--gold);color:var(--deep);border-color:var(--gold);}
+.calc-field input[type=range]{width:100%;accent-color:var(--gold);}
+.calc-amt{font-size:22px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--gold);}
+.calc-result{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.16);border-radius:20px;padding:1.8rem;display:flex;flex-direction:column;justify-content:center;text-align:center;backdrop-filter:blur(4px);}
+.calc-big{font-size:44px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--green);letter-spacing:-1px;}
+.calc-note{font-size:12px;opacity:.75;margin-top:8px;line-height:1.6;}
+
+/* District risk map */
+.map-wrap{display:grid;grid-template-columns:1fr 1.1fr;gap:2rem;margin-bottom:4rem;background:var(--card);border:1px solid var(--border);border-radius:26px;padding:2rem;align-items:center;}
+.mu-map{width:100%;max-width:340px;margin:0 auto;display:block;}
+.mu-map .dist{fill:var(--bg);stroke:var(--teal);stroke-width:1.6;cursor:pointer;transition:all .2s;}
+.mu-map .dist:hover{fill:rgba(14,149,148,0.25);}
+.mu-map .dist.on{fill:var(--teal);}
+.mu-map text{font-size:8.5px;font-weight:700;fill:var(--muted);pointer-events:none;font-family:'Plus Jakarta Sans',sans-serif;}
+.dist-info h3{font-size:21px;font-weight:700;margin-bottom:4px;}
+.dist-meta{font-size:13px;color:var(--muted);margin-bottom:1.2rem;}
+.risk-row{display:flex;align-items:center;gap:12px;margin-bottom:0.9rem;}
+.risk-row .rl{font-size:12px;font-weight:700;width:110px;color:var(--muted);}
+.risk-track{flex:1;height:9px;background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.risk-fill{height:100%;border-radius:10px;transition:width .5s ease;}
+.risk-val{font-size:11.5px;font-weight:800;width:64px;text-align:right;}
+.dist-tip{background:rgba(255,193,69,0.12);border:1px solid rgba(255,193,69,0.4);border-radius:12px;padding:10px 14px;font-size:12px;line-height:1.6;margin-top:1rem;}
+
+/* Stats band */
+.stats-band{background:linear-gradient(135deg,var(--deep),#0B5B6B);border-radius:24px;padding:2.4rem 2rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:4rem;}
+.stat-cell{text-align:center;color:#fff;}
+.stat-cell .sn{font-size:34px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--gold);letter-spacing:-1px;}
+.stat-cell .sl{font-size:12px;color:rgba(255,255,255,0.7);margin-top:4px;}
+
+/* Dodo points */
+.pts-band{border:1.5px dashed var(--gold);background:rgba(255,193,69,0.07);border-radius:22px;padding:1.7rem 2rem;display:flex;align-items:center;gap:1.6rem;margin-bottom:4rem;flex-wrap:wrap;}
+.pts-band .pb-icon{font-size:44px;}
+.pts-band h3{font-size:18px;font-weight:700;margin-bottom:3px;}
+.pts-band p{font-size:13px;color:var(--muted);line-height:1.6;max-width:560px;}
+.btn-gold{background:var(--gold);color:#3A2B00;border:none;padding:13px 22px;border-radius:12px;font-size:13.5px;font-weight:800;cursor:pointer;margin-left:auto;box-shadow:0 6px 16px rgba(255,193,69,0.4);transition:all .2s;white-space:nowrap;}
+.btn-gold:hover{transform:translateY(-2px);}
+
+/* Reviews */
+.rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:4rem;}
+.rev-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1.5rem;transition:all .25s;}
+.rev-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+.rev-stars{color:var(--gold);font-size:14px;margin-bottom:8px;letter-spacing:2px;}
+.rev-text{font-size:13.5px;line-height:1.7;margin-bottom:1rem;}
+.rev-who{display:flex;align-items:center;gap:10px;}
+.rev-avi{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;}
+.rev-name{font-size:13px;font-weight:800;}
+.rev-loc{font-size:11px;color:var(--muted);}
+.verified{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--green);font-weight:800;margin-left:6px;}
+
+/* Quiz teaser */
+.quiz-band{background:linear-gradient(135deg,#3F2E8C,var(--lav));border-radius:24px;padding:2.2rem;color:#fff;display:flex;align-items:center;gap:1.6rem;margin-bottom:4rem;flex-wrap:wrap;position:relative;overflow:hidden;}
+.quiz-band::after{content:'🎓';position:absolute;font-size:130px;right:-16px;top:-24px;opacity:.12;transform:rotate(12deg);}
+.quiz-band h3{font-size:21px;font-weight:700;margin-bottom:4px;}
+.quiz-band p{font-size:13px;opacity:.85;max-width:520px;line-height:1.6;}
+.btn-quiz{background:#fff;color:#3F2E8C;border:none;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;margin-left:auto;transition:all .2s;white-space:nowrap;}
+.btn-quiz:hover{transform:translateY(-2px);}
+
+/* FAQ */
+.faq-wrap{max-width:780px;margin:0 auto 4rem;}
+.faq-item{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all .2s;}
+.faq-item.open{border-color:var(--teal);}
+.faq-q{padding:1.1rem 1.4rem;font-size:14.5px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;gap:1rem;}
+.faq-q .chev{transition:transform .25s;color:var(--muted);}
+.faq-item.open .chev{transform:rotate(180deg);color:var(--teal);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:13.5px;color:var(--muted);line-height:1.7;}
+.faq-item.open .faq-a{max-height:260px;}
+.faq-a-inner{padding:0 1.4rem 1.2rem;}
+
+/* CTA banner */
+.cta-banner{background:linear-gradient(135deg,var(--teal),var(--deep2));border-radius:26px;padding:3rem 2rem;text-align:center;color:#fff;margin-bottom:1rem;position:relative;overflow:hidden;}
+.cta-banner::before{content:'🦤';position:absolute;left:4%;bottom:-16px;font-size:110px;opacity:.14;transform:rotate(-10deg);}
+.cta-banner h2{font-size:29px;font-weight:700;margin-bottom:0.5rem;position:relative;letter-spacing:-0.6px;}
+.cta-banner p{font-size:14px;opacity:0.88;margin-bottom:1.6rem;position:relative;}
+
+/* footer */
+footer{background:var(--deep);color:#fff;padding:3rem 1.5rem 1.6rem;}
+.foot-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:2rem;margin-bottom:2rem;}
+.foot-brand p{font-size:12.5px;color:rgba(255,255,255,0.55);line-height:1.7;margin-top:0.8rem;max-width:270px;}
+.foot-col h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:1rem;}
+.foot-col a{display:block;font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:9px;cursor:pointer;text-decoration:none;transition:color .2s;}
+.foot-col a:hover{color:#fff;}
+.foot-bottom{max-width:1200px;margin:0 auto;border-top:1px solid rgba(255,255,255,0.1);padding-top:1.4rem;font-size:11px;color:rgba(255,255,255,0.4);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+
+/* ═══ WIZARD ═══ */
+.wizard-shell{max-width:720px;margin:2.4rem auto;padding:0 1.5rem 5rem;}
+.wiz-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.wiz-back{background:none;border:none;color:var(--muted);font-size:13.5px;font-weight:700;cursor:pointer;}
+.wiz-back:hover{color:var(--teal);}
+.wiz-secure{font-size:11.5px;color:var(--green);font-weight:800;}
+.progress-track{height:9px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:0.6rem;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:10px;transition:width .4s ease;width:0%;}
+.progress-label{font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:1.7rem;display:flex;justify-content:space-between;}
+.wiz-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:2.2rem;box-shadow:var(--shadow);}
+.wiz-q{font-size:22px;font-weight:700;margin-bottom:0.4rem;font-family:'Space Grotesk',sans-serif;letter-spacing:-0.4px;}
+.wiz-hint{font-size:13px;color:var(--muted);margin-bottom:1.6rem;}
+.opt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.opt-grid.three{grid-template-columns:repeat(3,1fr);}
+.opt-card{border:1.5px solid var(--border);border-radius:16px;padding:1.2rem 1rem;text-align:center;cursor:pointer;transition:all .15s;background:var(--card);}
+.opt-card:hover{border-color:var(--teal);transform:translateY(-2px);}
+.opt-card.selected{border-color:var(--teal);background:rgba(14,149,148,0.08);box-shadow:0 0 0 3px rgba(14,149,148,0.15);}
+.opt-icon{font-size:27px;margin-bottom:8px;}
+.opt-label{font-size:13.5px;font-weight:800;}
+.opt-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.wiz-field{margin-bottom:1.2rem;}
+.wiz-field label{display:block;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:7px;}
+.wiz-field input,.wiz-field select{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:13px;font-size:15px;color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s;background:var(--card);}
+.wiz-field input:focus,.wiz-field select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,149,148,0.12);}
+.wiz-nav{display:flex;gap:12px;margin-top:1.8rem;}
+.btn-wiz-next{flex:1;background:linear-gradient(135deg,var(--coral),var(--coral2));color:#fff;border:none;padding:16px;border-radius:13px;font-size:15.5px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(240,78,66,0.35);transition:all .2s;}
+.btn-wiz-next:hover{transform:translateY(-1px);}
+.btn-wiz-prev{background:var(--card);color:var(--muted);border:1.5px solid var(--border);padding:16px 24px;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;}
+.wiz-trust{display:flex;justify-content:center;gap:1.4rem;margin-top:1.4rem;font-size:11px;color:var(--muted);flex-wrap:wrap;font-weight:600;}
+
+/* ═══ AGGREGATOR SEARCH ═══ */
+.agg-shell{max-width:640px;margin:3rem auto;padding:0 1.5rem 5rem;text-align:center;}
+.agg-radar{width:116px;height:116px;margin:0 auto 1.6rem;position:relative;}
+.agg-radar .ring{position:absolute;inset:0;border:3px solid var(--teal);border-radius:50%;opacity:0;animation:radar 2s infinite;}
+.agg-radar .ring:nth-child(2){animation-delay:0.66s;}
+.agg-radar .ring:nth-child(3){animation-delay:1.33s;}
+.agg-radar .core{position:absolute;inset:30px;background:linear-gradient(135deg,var(--teal),var(--deep2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 24px rgba(14,149,148,0.45);}
+@keyframes radar{0%{transform:scale(0.5);opacity:0.8;}100%{transform:scale(1.5);opacity:0;}}
+.agg-title{font-size:24px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin-bottom:0.4rem;letter-spacing:-0.4px;}
+.agg-sub{font-size:13.5px;color:var(--muted);margin-bottom:2rem;}
+.agg-list{display:flex;flex-direction:column;gap:10px;max-width:440px;margin:0 auto;}
+.agg-row{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:0.9rem 1.2rem;display:flex;align-items:center;justify-content:space-between;opacity:0.35;transition:all .3s;}
+.agg-row.active{opacity:1;border-color:var(--teal);box-shadow:0 4px 14px rgba(14,149,148,0.12);}
+.agg-row.done{opacity:1;border-color:var(--green);}
+.agg-row-left{display:flex;align-items:center;gap:12px;}
+.agg-logo{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;}
+.agg-name{font-size:13.5px;font-weight:800;}
+.agg-status{font-size:12px;font-weight:800;}
+.agg-status.searching{color:var(--teal);}
+.agg-status.found{color:var(--green);}
+.spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:-2px;margin-right:5px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ═══ RESULTS ═══ */
+.res-header{background:linear-gradient(135deg,var(--deep),var(--deep2));color:#fff;padding:1.6rem 1.5rem;}
+.res-header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.res-header h2{font-size:21px;font-weight:700;}
+.res-header .rh-sub{font-size:12.5px;opacity:0.78;margin-top:3px;}
+.rh-summary{display:flex;gap:10px;flex-wrap:wrap;}
+.rh-chip{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.rh-chip button{background:none;border:none;color:var(--gold);font-size:11px;font-weight:800;cursor:pointer;text-decoration:underline;}
+.res-body{max-width:1200px;margin:0 auto;padding:1.8rem 1.5rem 8rem;display:grid;grid-template-columns:252px 1fr;gap:1.6rem;}
+.filters{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.3rem;height:fit-content;position:sticky;top:86px;}
+.filters h3{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:1.2rem;}
+.f-group{margin-bottom:1.4rem;}
+.f-group label{font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;}
+.f-group select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:11px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;background:var(--card);color:var(--ink);outline:none;}
+.f-group input[type=range]{width:100%;accent-color:var(--teal);}
+.f-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.f-chip{background:var(--bg);border:1.5px solid var(--border);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s;}
+.f-chip.on{background:var(--teal);color:#fff;border-color:var(--teal);}
+.sort-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem;flex-wrap:wrap;}
+.sort-chip{background:var(--card);border:1.5px solid var(--border);border-radius:20px;padding:7px 16px;font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer;transition:all .15s;}
+.sort-chip.on{background:var(--deep);color:#fff;border-color:var(--deep);}
+body.dark .sort-chip.on{background:var(--teal);border-color:var(--teal);}
+.res-count{font-size:13px;color:var(--muted);margin-bottom:1rem;font-weight:700;}
+.res-count b{color:var(--ink);}
+.deal-card{background:var(--card);border:1.5px solid var(--border);border-radius:20px;padding:1.4rem;margin-bottom:14px;display:grid;grid-template-columns:64px 1fr auto;gap:1.2rem;align-items:start;transition:all .2s;position:relative;}
+.deal-card:hover{border-color:var(--teal);box-shadow:0 12px 32px rgba(14,149,148,0.13);}
+.deal-card.best{border-color:var(--green);background:linear-gradient(180deg,rgba(6,214,160,0.07),var(--card) 45%);}
+.best-ribbon{position:absolute;top:-11px;left:20px;background:var(--green);color:#03332A;font-size:10.5px;font-weight:800;padding:4px 14px;border-radius:20px;letter-spacing:0.5px;box-shadow:0 4px 10px rgba(6,214,160,0.4);}
+.cheapest-ribbon{position:absolute;top:-11px;left:20px;background:var(--gold);color:#3A2B00;font-size:10.5px;font-weight:800;padding:4px 14px;border-radius:20px;letter-spacing:0.5px;}
+.dc-logo{width:60px;height:60px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:#fff;text-align:center;line-height:1.25;}
+.dc-name{font-size:16px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
+.dc-insurer{font-size:12px;color:var(--muted);margin-top:1px;}
+.dc-meta-row{display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap;}
+.dc-rating{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;color:#A16E00;background:rgba(255,193,69,0.16);padding:3px 9px;border-radius:20px;}
+body.dark .dc-rating{color:var(--gold);}
+.cov-ring{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:var(--teal);background:rgba(14,149,148,0.1);padding:3px 9px;border-radius:20px;}
+.dc-features{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+.dc-feat{font-size:11px;font-weight:700;color:var(--green);background:rgba(6,214,160,0.1);padding:4px 10px;border-radius:20px;}
+.dc-feat.neutral{color:var(--muted);background:var(--bg);}
+.dc-price-zone{text-align:right;min-width:176px;}
+.dc-save{font-size:11px;font-weight:800;color:var(--green);background:rgba(6,214,160,0.1);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:5px;}
+.dc-price{font-size:26px;font-weight:700;font-family:'Space Grotesk',sans-serif;letter-spacing:-0.5px;}
+.dc-per{font-size:11.5px;color:var(--muted);}
+.dc-annual{font-size:11px;color:var(--muted);margin-top:2px;}
+.btn-deal{display:block;width:100%;margin-top:10px;background:linear-gradient(135deg,var(--coral),var(--coral2));color:#fff;border:none;padding:12px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 5px 16px rgba(240,78,66,0.3);transition:all .2s;}
+.btn-deal:hover{transform:translateY(-1px);}
+.btn-deal-cmp{display:block;width:100%;margin-top:7px;background:var(--card);color:var(--teal);border:1.5px solid var(--border);padding:10px;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;}
+.btn-deal-cmp:hover{border-color:var(--teal);}
+.btn-deal-cmp.added{background:rgba(6,214,160,0.1);border-color:var(--green);color:var(--green);}
+.btn-wa-quote{display:block;width:100%;margin-top:7px;background:rgba(37,211,102,0.1);color:#128C7E;border:1.5px solid rgba(37,211,102,0.4);padding:9px;border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;}
+
+/* compare bar */
+#cmp-bar{position:fixed;bottom:0;left:0;right:0;background:var(--glass);backdrop-filter:blur(14px);border-top:2px solid var(--teal);padding:12px 1.5rem;z-index:600;display:none;box-shadow:0 -8px 30px rgba(0,0,0,0.14);}
+#cmp-bar.on{display:block;}
+.cmp-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:12px;}
+.cmp-title{font-size:12.5px;font-weight:800;white-space:nowrap;}
+.cmp-slots{display:flex;gap:10px;flex:1;}
+.cmp-slot{flex:1;max-width:210px;background:var(--bg);border:1.5px dashed var(--border);border-radius:11px;padding:8px 12px;min-height:50px;display:flex;align-items:center;justify-content:center;}
+.cmp-slot.filled{background:var(--card);border:1.5px solid var(--teal);justify-content:space-between;}
+.cmp-slot .sn{font-size:12px;font-weight:800;}
+.cmp-slot .sp{font-size:10.5px;color:var(--muted);}
+.cmp-x{background:none;border:none;color:var(--coral);font-size:16px;font-weight:800;cursor:pointer;}
+.btn-cmp-go{background:var(--deep);color:#fff;border:none;padding:12px 24px;border-radius:11px;font-size:13.5px;font-weight:800;cursor:pointer;white-space:nowrap;}
+body.dark .btn-cmp-go{background:var(--teal);}
+.btn-cmp-go:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-cmp-clear{background:none;border:1.5px solid var(--border);color:var(--muted);padding:11px 16px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;}
+
+/* ═══ MODALS ═══ */
+.overlay{position:fixed;inset:0;background:rgba(3,32,44,0.6);backdrop-filter:blur(4px);z-index:700;display:none;align-items:center;justify-content:center;padding:1.5rem;}
+.overlay.on{display:flex;}
+.modal{background:var(--card);border-radius:24px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,0.35);animation:modalIn .25s ease;}
+@keyframes modalIn{from{opacity:0;transform:translateY(18px) scale(.98);}to{opacity:1;transform:none;}}
+.modal.wide{max-width:980px;}
+.modal-head{background:linear-gradient(135deg,var(--deep),var(--deep2));color:#fff;padding:1.5rem 1.8rem;border-radius:24px 24px 0 0;display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:0;z-index:2;}
+.modal-head h3{font-size:20px;font-weight:700;}
+.modal-head p{font-size:13px;opacity:0.78;margin-top:3px;}
+.m-close{background:rgba(255,255,255,0.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;flex-shrink:0;}
+.modal-body{padding:1.8rem;}
+.price-hero{background:var(--bg);border-radius:16px;padding:1.3rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:1.4rem;}
+.price-hero .ph-amt{font-size:30px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
+.price-hero .ph-per{font-size:12.5px;color:var(--muted);}
+.m-sec{margin-bottom:1.3rem;}
+.m-sec h4{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border);}
+.feat-li{display:flex;gap:9px;font-size:13.5px;margin-bottom:8px;align-items:flex-start;}
+.feat-li::before{content:'✓';color:var(--green);font-weight:800;flex-shrink:0;}
+.m-actions{display:flex;gap:12px;margin-top:1.5rem;}
+.btn-buy{flex:1;background:linear-gradient(135deg,var(--coral),var(--coral2));color:#fff;border:none;padding:15px;border-radius:13px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 6px 18px rgba(240,78,66,0.3);}
+.btn-call{flex:1;background:var(--card);color:var(--teal);border:2px solid var(--teal);padding:15px;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;}
+.cmp-table th{background:var(--bg);padding:11px 14px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;}
+.cmp-table td{padding:11px 14px;border-bottom:1px solid var(--border);}
+.cmp-table .lbl{font-weight:700;color:var(--muted);width:150px;}
+.yes{color:var(--green);font-weight:800;}
+.no{color:var(--muted);opacity:.5;}
+
+/* cyclone modal */
+.cyc-level{display:flex;gap:9px;margin-bottom:1.3rem;flex-wrap:wrap;}
+.cyc-pill{flex:1;min-width:104px;border-radius:14px;padding:12px 10px;text-align:center;border:1.5px solid var(--border);}
+.cyc-pill b{display:block;font-size:17px;font-family:'Space Grotesk',sans-serif;}
+.cyc-pill span{font-size:10.5px;color:var(--muted);font-weight:700;}
+.cyc-pill.active-lvl{border-color:var(--green);background:rgba(6,214,160,0.08);}
+.check-li{display:flex;gap:10px;font-size:13.5px;margin-bottom:9px;align-items:flex-start;padding:9px 12px;background:var(--bg);border-radius:11px;cursor:pointer;transition:all .15s;}
+.check-li.done{opacity:.55;text-decoration:line-through;}
+.check-li .cb{width:19px;height:19px;border:2px solid var(--teal);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;}
+.check-li.done .cb{background:var(--green);border-color:var(--green);}
+
+/* quiz modal */
+.qz-q{font-size:17px;font-weight:700;margin-bottom:1.1rem;font-family:'Space Grotesk',sans-serif;}
+.qz-opt{display:block;width:100%;text-align:left;background:var(--bg);border:1.5px solid var(--border);border-radius:13px;padding:13px 16px;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;margin-bottom:9px;transition:all .15s;}
+.qz-opt:hover{border-color:var(--teal);}
+.qz-opt.right{border-color:var(--green);background:rgba(6,214,160,0.12);}
+.qz-opt.wrong{border-color:var(--coral);background:rgba(255,107,94,0.1);}
+.qz-progress{font-size:11.5px;font-weight:800;color:var(--muted);margin-bottom:0.7rem;letter-spacing:1px;}
+
+/* ═══ CHECKOUT / DASHBOARD ═══ */
+.co-shell{max-width:720px;margin:2rem auto;padding:0 1.5rem 5rem;}
+.co-steps{display:flex;align-items:center;margin-bottom:1.8rem;}
+.co-step{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;}
+.co-dot{width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+.co-step.act .co-dot{background:var(--teal);color:#fff;}
+.co-step.done .co-dot{background:var(--green);color:#fff;}
+.co-line{flex:1;height:2px;background:var(--border);margin:0 10px;}
+.co-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1.8rem;margin-bottom:1.2rem;}
+.co-card h3{font-size:17px;font-weight:700;margin-bottom:1.2rem;}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fgrid .full{grid-column:span 2;}
+.ffield label{display:block;font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.ffield input,.ffield select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;background:var(--card);color:var(--ink);}
+.ffield input:focus{border-color:var(--teal);}
+.pay-row{display:flex;gap:10px;margin-bottom:1.2rem;flex-wrap:wrap;}
+.pay-opt{flex:1;min-width:96px;border:1.5px solid var(--border);border-radius:13px;padding:12px;text-align:center;cursor:pointer;transition:all .15s;}
+.pay-opt.sel{border-color:var(--teal);background:rgba(14,149,148,0.08);}
+.pay-opt .pi{font-size:22px;margin-bottom:4px;}
+.pay-opt .pl{font-size:10.5px;font-weight:800;color:var(--muted);}
+.btn-pay{width:100%;background:linear-gradient(135deg,var(--coral),var(--coral2));color:#fff;border:none;padding:16px;border-radius:13px;font-size:15.5px;font-weight:800;cursor:pointer;margin-top:0.6rem;box-shadow:0 6px 18px rgba(240,78,66,0.3);}
+.summary-strip{background:var(--bg);border-radius:15px;padding:1.1rem 1.3rem;display:flex;align-items:center;gap:1rem;margin-bottom:1.4rem;}
+
+/* dashboard */
+.dash-shell{max-width:980px;margin:2rem auto;padding:0 1.5rem 5rem;}
+.dash-head{display:flex;align-items:center;gap:1rem;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1.4rem;margin-bottom:1.2rem;flex-wrap:wrap;}
+.dash-avi{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--deep2));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;}
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.2rem;}
+.ds-cell{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.2rem;text-align:center;}
+.ds-num{font-size:24px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
+.ds-lbl{font-size:11px;color:var(--muted);margin-top:3px;font-weight:700;}
+.pol-row{display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--bg);border-radius:13px;margin-bottom:10px;flex-wrap:wrap;}
+.remind-band{border-radius:18px;overflow:hidden;border:2px solid var(--coral);margin-bottom:1.2rem;}
+.remind-head{background:var(--coral);padding:11px 16px;display:flex;align-items:center;gap:9px;color:#fff;}
+.remind-body{background:rgba(255,107,94,0.06);padding:12px 16px;}
+.remind-item{display:flex;align-items:center;gap:12px;padding:11px;background:var(--card);border-radius:12px;border:1.5px solid rgba(255,107,94,0.3);flex-wrap:wrap;margin-bottom:8px;}
+
+/* toast + floats + dodo chat */
+#toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(50px);background:var(--deep);color:#fff;padding:12px 24px;border-radius:13px;font-size:13.5px;font-weight:700;z-index:999;transition:all .3s;opacity:0;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+#wa-float{position:fixed;bottom:22px;left:22px;width:54px;height:54px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:25px;cursor:pointer;box-shadow:0 8px 24px rgba(37,211,102,0.45);z-index:550;transition:transform .2s;border:none;}
+#wa-float:hover{transform:scale(1.1);}
+#dodo-fab{position:fixed;bottom:22px;right:22px;height:56px;border-radius:30px;background:linear-gradient(135deg,var(--teal),var(--deep2));color:#fff;display:flex;align-items:center;gap:9px;padding:0 20px 0 14px;cursor:pointer;box-shadow:0 10px 28px rgba(14,149,148,0.5);z-index:550;transition:transform .2s;border:none;font-size:14px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;}
+#dodo-fab:hover{transform:scale(1.05);}
+#dodo-fab .df-emoji{font-size:26px;}
+#dodo-panel{position:fixed;bottom:92px;right:22px;width:min(370px,calc(100vw - 44px));background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,0.3);z-index:650;display:none;flex-direction:column;overflow:hidden;max-height:min(540px,70vh);}
+#dodo-panel.on{display:flex;animation:modalIn .25s ease;}
+.dp-head{background:linear-gradient(135deg,var(--teal),var(--deep2));color:#fff;padding:1rem 1.2rem;display:flex;align-items:center;gap:10px;}
+.dp-head .dph-emoji{font-size:30px;}
+.dp-head h4{font-size:15px;font-weight:700;}
+.dp-head p{font-size:11px;opacity:.85;}
+.dp-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:9px;min-height:200px;}
+.dp-msg{max-width:85%;padding:10px 14px;border-radius:15px;font-size:13px;line-height:1.55;}
+.dp-msg.bot{background:var(--bg);border:1px solid var(--border);border-bottom-left-radius:4px;align-self:flex-start;}
+.dp-msg.user{background:var(--teal);color:#fff;border-bottom-right-radius:4px;align-self:flex-end;}
+.dp-sugg{display:flex;flex-wrap:wrap;gap:7px;padding:0 1rem 0.8rem;}
+.dp-chip{background:rgba(14,149,148,0.09);border:1px solid rgba(14,149,148,0.3);color:var(--teal);border-radius:20px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;}
+.dp-input{display:flex;gap:8px;padding:0.8rem 1rem 1rem;border-top:1px solid var(--border);}
+.dp-input input{flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:13px;outline:none;background:var(--card);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;}
+.dp-input button{background:var(--teal);color:#fff;border:none;border-radius:12px;padding:0 16px;font-size:16px;cursor:pointer;}
+
+/* confetti */
+.confetti{position:fixed;top:-12px;font-size:18px;z-index:998;animation:confFall linear forwards;pointer-events:none;}
+@keyframes confFall{to{transform:translateY(105vh) rotate(720deg);opacity:.6;}}
+
+@media(max-width:960px){
+  .hero-inner,.calc-wrap,.map-wrap{grid-template-columns:1fr;}
+  .hero h1{font-size:33px;}
+  .hiw-grid,.rev-grid{grid-template-columns:1fr;}
+  .prod-grid{grid-template-columns:repeat(2,1fr);}
+  .lm-grid{grid-template-columns:repeat(2,1fr);}
+  .stats-band,.dash-stats{grid-template-columns:repeat(2,1fr);}
+  .res-body{grid-template-columns:1fr;}
+  .filters{display:none;}
+  .deal-card{grid-template-columns:1fr;}
+  .dc-price-zone{text-align:left;}
+  .nav-links{display:none;}
+  .foot-inner{grid-template-columns:1fr 1fr;}
+  .fgrid{grid-template-columns:1fr;}
+  .fgrid .full{grid-column:span 1;}
+  .opt-grid.three{grid-template-columns:repeat(2,1fr);}
+  .btn-nav-login{display:none;}
+  .pts-band,.quiz-band{flex-direction:column;align-items:flex-start;}
+  .btn-gold,.btn-quiz{margin-left:0;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<button id="wa-float" onclick="showToast('💬 WhatsApp support: +230 5XXX XXXX')" title="WhatsApp">💬</button>
+<button id="dodo-fab" onclick="toggleDodo()"><span class="df-emoji">🦤</span><span data-i18n="dodo_fab">Ask Dodo</span></button>
+
+<!-- DODO ASSISTANT -->
+<div id="dodo-panel">
+  <div class="dp-head">
+    <span class="dph-emoji">🦤</span>
+    <div><h4>Dodo — your insurance sidekick</h4><p>EN · FR · Kreol Morisien</p></div>
+    <button class="m-close" style="margin-left:auto;" onclick="toggleDodo()">✕</button>
+  </div>
+  <div class="dp-msgs" id="dp-msgs"></div>
+  <div class="dp-sugg" id="dp-sugg"></div>
+  <div class="dp-input">
+    <input id="dp-in" placeholder="Ask me anything about insurance…" onkeydown="if(event.key==='Enter')dodoSend()">
+    <button onclick="dodoSend()">➤</button>
+  </div>
+</div>
+
+<!-- CYCLONE TICKER -->
+<div id="cyc-bar" onclick="openCyclone()">
+  <span class="pulse"></span>
+  <span id="cyc-txt">🌀 <b>Cyclone Watch:</b> No active warning · Season Nov–May · Is your home &amp; car cyclone-ready?</span>
+  <span class="cyc-cta" data-i18n="cyc_cta">Check my cover →</span>
+</div>
+
+<nav>
+  <div class="brand" onclick="showPage('home')">
+    <div class="brand-mark">🦤</div>
+    <div>
+      <div class="brand-name">One<b>Insurance</b></div>
+      <span class="brand-tag">KONPAR · SANZE · EKONOMIZE</span>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a onclick="startWizard('motor')" data-i18n="nav_motor">Motor</a></li>
+    <li><a onclick="startWizard('health')" data-i18n="nav_health">Health</a></li>
+    <li><a onclick="startWizard('life')" data-i18n="nav_life">Life</a></li>
+    <li><a onclick="startWizard('travel')" data-i18n="nav_travel">Travel</a></li>
+    <li><a onclick="startWizard('home')" data-i18n="nav_home">Home</a></li>
+    <li><a onclick="showPage('claims')" data-i18n="nav_claims">Claims</a></li>
+  </ul>
+  <div class="nav-right">
+    <select id="lang-sel" onchange="setLang(this.value)">
+      <option value="en">🇬🇧 EN</option>
+      <option value="fr">🇫🇷 FR</option>
+      <option value="kr">🇲🇺 KR</option>
+    </select>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Dark / light mode">🌙</button>
+    <button class="btn-nav-login" onclick="showPage('account')">Mon Compte</button>
+    <button class="btn-nav-quote" onclick="startWizard('motor')" data-i18n="nav_quote">Get My Quote</button>
+  </div>
+</nav>
+
+<!-- ═══════════ HOME ═══════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-badge" data-i18n="hero_badge">🇲🇺 Mauritius's smartest insurance comparison · 100% free</div>
+        <h1 id="hero-h1">One island. Every insurer. <em>Your best price.</em></h1>
+        <p class="hero-sub" id="hero-sub">We scan <b style="color:#fff">15+ Mauritian insurers</b> in real time — motor, health, life, travel, home &amp; business — and rank every plan side by side. Cyclone cover clearly flagged. Pay with Juice, Blink or MyT Money.</p>
+        <div class="hero-ctas">
+          <button class="btn-hero" onclick="startWizard('motor')" data-i18n="hero_cta1">🚀 Compare Now — Free</button>
+          <button class="btn-hero-ghost" onclick="openQuiz()" data-i18n="hero_cta2">🎓 Test Your Insurance IQ</button>
+        </div>
+        <div class="hero-proof">
+          <div class="proof-item"><span class="proof-num" data-count="52400">0</span> Mauritians covered</div>
+          <div class="proof-item"><span class="proof-num">MUR <span data-count="4200000" data-fmt="m">0</span></span> saved last year</div>
+          <div class="proof-item"><span class="proof-num">★ 4.8</span> average rating</div>
+        </div>
+        <div class="live-ticker">⚡ <span id="live-tick"><b>Kevin from Rose-Hill</b> just saved <b>MUR 3,240/yr</b> on motor cover</span></div>
+      </div>
+      <div class="hero-card">
+        <h3 data-i18n="hc_title">Ki ou anvi asire zordi?</h3>
+        <p class="hc-sub" data-i18n="hc_sub">What do you want to insure today? Quotes from every insurer in 60 seconds.</p>
+        <div class="product-select-grid">
+          <div class="psg-item" onclick="startWizard('motor')"><div class="psg-icon">🚗</div><div class="psg-name">Motor</div><div class="psg-price">from MUR 117/mo</div></div>
+          <div class="psg-item" onclick="startWizard('health')"><div class="psg-icon">🏥</div><div class="psg-name">Health</div><div class="psg-price">from MUR 299/mo</div></div>
+          <div class="psg-item" onclick="startWizard('life')"><div class="psg-icon">🛡️</div><div class="psg-name">Life</div><div class="psg-price">from MUR 300/mo</div></div>
+          <div class="psg-item" onclick="startWizard('travel')"><div class="psg-icon">✈️</div><div class="psg-name">Travel</div><div class="psg-price">from MUR 500/trip</div></div>
+          <div class="psg-item" onclick="startWizard('home')"><div class="psg-icon">🏠</div><div class="psg-name">Home</div><div class="psg-price">from MUR 113/mo</div></div>
+          <div class="psg-item" onclick="startWizard('business')"><div class="psg-icon">💼</div><div class="psg-name">Business</div><div class="psg-price">from MUR 267/mo</div></div>
+        </div>
+        <div class="hc-foot">🔒 Secure · No spam · FSC-licensed broker · Free forever</div>
+      </div>
+    </div>
+    <div class="wave"><svg viewBox="0 0 1440 70" preserveAspectRatio="none" style="width:100%;height:70px;display:block;"><path d="M0,40 C240,80 480,0 720,30 C960,60 1200,10 1440,45 L1440,70 L0,70 Z" fill="var(--bg)"/></svg></div>
+  </div>
+
+  <div class="insurer-strip">
+    <div class="marquee" id="marquee"></div>
+  </div>
+
+  <main>
+    <!-- LIFE MOMENTS -->
+    <div class="center reveal">
+      <span class="eyebrow" data-i18n="lm_eyebrow">Life moments</span>
+      <h2 class="sec-title" data-i18n="lm_title">Insurance that follows your life</h2>
+      <p class="sec-sub" data-i18n="lm_sub">Big moment coming up? We'll tell you exactly what cover you need — nothing more.</p>
+    </div>
+    <div class="lm-grid reveal">
+      <div class="lm-card" style="background:linear-gradient(135deg,#0E9594,#12B5B0);" onclick="startWizard('motor')"><span class="lm-emoji">🔑</span><h3>Bought a car</h3><p>Third party vs comprehensive, decoded</p></div>
+      <div class="lm-card" style="background:linear-gradient(135deg,#F04E42,#FF8A5E);" onclick="startWizard('health')"><span class="lm-emoji">👶</span><h3>New baby</h3><p>Family floater + maternity plans</p></div>
+      <div class="lm-card" style="background:linear-gradient(135deg,#7B6CF6,#A78BFA);" onclick="startWizard('home')"><span class="lm-emoji">🏡</span><h3>First home</h3><p>Cyclone &amp; flood cover sorted</p></div>
+      <div class="lm-card" style="background:linear-gradient(135deg,#B7791F,#FFC145);" onclick="startWizard('travel')"><span class="lm-emoji">🌍</span><h3>Big trip</h3><p>Schengen-visa-ready in minutes</p></div>
+      <div class="lm-card" style="background:linear-gradient(135deg,#065F46,#06D6A0);" onclick="startWizard('business')"><span class="lm-emoji">🚀</span><h3>New business</h3><p>SME packs from MUR 267/mo</p></div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="center reveal">
+      <span class="eyebrow">60 seconds</span>
+      <h2 class="sec-title" data-i18n="hiw_title">How it works</h2>
+      <p class="sec-sub" data-i18n="hiw_sub">Three steps. Sixty seconds. Serious savings.</p>
+    </div>
+    <div class="hiw-grid reveal">
+      <div class="hiw-card"><div class="hiw-num">1</div><div class="hiw-icon" style="background:rgba(14,149,148,0.12);">📝</div><h3>Tell us what you need</h3><p>Answer a few quick questions about your car, health, home or trip. Under a minute — no documents needed.</p></div>
+      <div class="hiw-card"><div class="hiw-num">2</div><div class="hiw-icon" style="background:rgba(6,214,160,0.12);">⚡</div><h3>We scan every insurer</h3><p>Our engine fetches live prices from 15+ Mauritian insurers simultaneously and ranks them with a Coverage Score.</p></div>
+      <div class="hiw-card"><div class="hiw-num">3</div><div class="hiw-icon" style="background:rgba(255,193,69,0.16);">🎉</div><h3>Buy &amp; get covered today</h3><p>Pick your plan, pay with card, Juice, Blink or MyT Money, and receive your policy instantly by email &amp; WhatsApp.</p></div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="center reveal" id="products">
+      <span class="eyebrow" data-i18n="prod_eyebrow">8 product lines</span>
+      <h2 class="sec-title" data-i18n="prod_title">Every type of cover, one platform</h2>
+      <p class="sec-sub" data-i18n="prod_sub">Click any product to compare quotes instantly</p>
+    </div>
+    <div class="prod-grid reveal">
+      <div class="prod-card" onclick="startWizard('motor')"><span class="pc-badge hot">MOST POPULAR</span><div class="pc-icon" style="background:rgba(255,107,94,0.12);">🚗</div><h3>Motor Insurance</h3><p class="pc-from">from <b>MUR 1,400/yr</b> · RTA compliant</p><span class="pc-cta">Compare Now →</span></div>
+      <div class="prod-card" onclick="startWizard('health')"><span class="pc-badge">FAMILY PLANS</span><div class="pc-icon" style="background:rgba(6,214,160,0.12);">🏥</div><h3>Health Insurance</h3><p class="pc-from">from <b>MUR 299/mo</b> · Local + Réunion</p><span class="pc-cta">Compare Now →</span></div>
+      <div class="prod-card" onclick="startWizard('life')"><div class="pc-icon" style="background:rgba(14,149,148,0.12);">🛡️</div><h3>Life Insurance</h3><p class="pc-from">from <b>MUR 300/mo</b> · up to MUR 5M cover</p><span class="pc-cta">Compare Now →</span></div>
+      <div class="prod-card" onclick="startWizard('travel')"><div class="pc-icon" style="background:rgba(123,108,246,0.12);">✈️</div><h3>Travel Insurance</h3><p class="pc-from">from <b>MUR 500/trip</b> · Schengen ready</p><span class="pc-cta">Compare Now →</span></div>
+      <div class="prod-card" onclick="startWizard('home')"><span class="pc-badge">CYCLONE COVER</span><div class="pc-icon" style="background:rgba(255,193,69,0.16);">🏠</div><h3>Home Insurance</h3><p class="pc-from">from <b>MUR 1,350/yr</b> · flood incl.</p><span class="pc-cta">Compare Now →</span></div>
+      <div class="prod-card" onclick="startWizard('business')"><div class="pc-icon" style="background:rgba(14,149,148,0.1);">💼</div><h3>Business Cover</h3><p class="pc-from">from <b>MUR 3,200/yr</b> · SME to corporate</p><span class="pc-cta">Compare Now →</span></div>
+      <div class="prod-card" onclick="startWizard('motor')"><div class="pc-icon" style="background:rgba(240,78,66,0.1);">🏍️</div><h3>Motorcycle</h3><p class="pc-from">from <b>MUR 714/yr</b> · instant renewal</p><span class="pc-cta">Compare Now →</span></div>
+      <div class="prod-card" onclick="startWizard('business')"><span class="pc-badge">NEW</span><div class="pc-icon" style="background:rgba(18,181,176,0.12);">🌊</div><h3>Marine &amp; Boat</h3><p class="pc-from">from <b>MUR 2,100/yr</b> · leisure &amp; cargo</p><span class="pc-cta">Compare Now →</span></div>
+    </div>
+
+    <!-- SAVINGS CALCULATOR -->
+    <div class="calc-wrap reveal" id="calculator">
+      <div>
+        <span class="eyebrow" style="background:rgba(255,193,69,0.18);color:var(--gold);" data-i18n="calc_eyebrow">Savings calculator</span>
+        <h2 data-i18n="calc_title">How much are you overpaying?</h2>
+        <p class="cw-sub" data-i18n="calc_sub">Mauritians who compare save 30% on average. Slide your current premium and see what switching could put back in your pocket.</p>
+        <div class="calc-field"><label data-i18n="calc_l1">I'm insuring my…</label>
+          <div class="calc-prods">
+            <span class="calc-prod on" onclick="calcSet(this,'motor')">🚗 Car</span>
+            <span class="calc-prod" onclick="calcSet(this,'health')">🏥 Health</span>
+            <span class="calc-prod" onclick="calcSet(this,'home')">🏠 Home</span>
+            <span class="calc-prod" onclick="calcSet(this,'life')">🛡️ Life</span>
+          </div>
+        </div>
+        <div class="calc-field">
+          <label data-i18n="calc_l2">My current premium: <span class="calc-amt" id="calc-amt">MUR 3,000 / month</span></label>
+          <input type="range" min="300" max="12000" step="100" value="3000" id="calc-range" oninput="calcUpdate()">
+        </div>
+      </div>
+      <div class="calc-result">
+        <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;" data-i18n="calc_r1">You could save up to</div>
+        <div class="calc-big" id="calc-save">MUR 10,800</div>
+        <div style="font-size:13px;font-weight:700;opacity:.85;" data-i18n="calc_r2">per year — that's a weekend in Rodrigues 🏝️</div>
+        <button class="btn-gold" style="margin:1.2rem auto 0;" onclick="startWizard(calcProduct)" data-i18n="calc_btn">Show me real quotes →</button>
+        <div class="calc-note" data-i18n="calc_note">Estimate based on the average 30% saving found by users who switched in 2025.</div>
+      </div>
+    </div>
+
+    <!-- DISTRICT RISK MAP -->
+    <div class="map-wrap reveal" id="riskmap">
+      <div>
+        <svg class="mu-map" viewBox="0 0 300 360" xmlns="http://www.w3.org/2000/svg">
+          <path class="dist" id="d-riv" onclick="pickDist('riv')" d="M150,18 C185,20 218,38 232,64 L196,96 L150,86 L128,52 Z"/>
+          <path class="dist" id="d-pam" onclick="pickDist('pam')" d="M128,52 L150,86 L118,118 L78,96 C88,64 104,50 128,52 Z"/>
+          <path class="dist" id="d-pl" onclick="pickDist('pl')" d="M78,96 L118,118 L108,150 L62,142 C60,124 66,106 78,96 Z"/>
+          <path class="dist" id="d-flacq" onclick="pickDist('flacq')" d="M196,96 L232,64 C252,92 262,128 258,164 L206,168 L172,132 L150,86 Z"/>
+          <path class="dist" id="d-moka" onclick="pickDist('moka')" d="M118,118 L150,86 L172,132 L152,168 L108,150 Z"/>
+          <path class="dist" id="d-pw" onclick="pickDist('pw')" d="M62,142 L108,150 L152,168 L146,210 L88,214 C68,192 58,166 62,142 Z"/>
+          <path class="dist" id="d-br" onclick="pickDist('br')" d="M88,214 L146,210 L138,262 L96,288 C74,266 66,240 88,214 Z"/>
+          <path class="dist" id="d-gp" onclick="pickDist('gp')" d="M146,210 L152,168 L206,168 L258,164 C254,210 236,252 204,284 L138,262 Z"/>
+          <path class="dist" id="d-sav" onclick="pickDist('sav')" d="M96,288 L138,262 L204,284 C176,316 138,332 104,322 C96,312 92,300 96,288 Z"/>
+          <text x="168" y="52">Rivière du R.</text>
+          <text x="86" y="80">Pampl.</text>
+          <text x="64" y="126">Port Louis</text>
+          <text x="204" y="126">Flacq</text>
+          <text x="126" y="136">Moka</text>
+          <text x="92" y="186">Plaines W.</text>
+          <text x="90" y="248">Black R.</text>
+          <text x="180" y="220">Grand Port</text>
+          <text x="120" y="306">Savanne</text>
+        </svg>
+        <p style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:8px;" data-i18n="map_tap">Tap a district to see its risk profile</p>
+      </div>
+      <div class="dist-info">
+        <span class="eyebrow" data-i18n="map_eyebrow">🗺️ Moris Risk Map</span>
+        <h3 id="di-name">Port Louis</h3>
+        <p class="dist-meta" id="di-meta">Capital · Dense traffic · Coastal flooding history (2013)</p>
+        <div class="risk-row"><span class="rl" data-i18n="map_r1">🌀 Cyclone risk</span><div class="risk-track"><div class="risk-fill" id="rf-cyc" style="width:70%;background:linear-gradient(90deg,var(--gold),var(--coral));"></div></div><span class="risk-val" id="rv-cyc">High</span></div>
+        <div class="risk-row"><span class="rl" data-i18n="map_r2">🌊 Flood risk</span><div class="risk-track"><div class="risk-fill" id="rf-flood" style="width:85%;background:linear-gradient(90deg,var(--gold),var(--coral));"></div></div><span class="risk-val" id="rv-flood">Very high</span></div>
+        <div class="risk-row"><span class="rl" data-i18n="map_r3">🚗 Road accidents</span><div class="risk-track"><div class="risk-fill" id="rf-road" style="width:90%;background:linear-gradient(90deg,var(--gold),var(--coral));"></div></div><span class="risk-val" id="rv-road">Very high</span></div>
+        <div class="dist-tip" id="di-tip">💡 <b>Tip:</b> In Port Louis, prioritise flood &amp; theft cover for vehicles, and check "alternative accommodation" in home policies.</div>
+        <button class="btn-gold" style="margin-top:1.2rem;margin-left:0;" onclick="startWizard('home')" data-i18n="map_btn">Get cover for my district →</button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-band reveal">
+      <div class="stat-cell"><div class="sn"><span data-count="15">0</span>+</div><div class="sl">Insurers compared live</div></div>
+      <div class="stat-cell"><div class="sn"><span data-count="30">0</span>%</div><div class="sl">Average savings found</div></div>
+      <div class="stat-cell"><div class="sn"><span data-count="60">0</span>s</div><div class="sl">To get all your quotes</div></div>
+      <div class="stat-cell"><div class="sn"><span data-count="52">0</span>K+</div><div class="sl">Happy Mauritian customers</div></div>
+    </div>
+
+    <!-- DODO POINTS -->
+    <div class="pts-band reveal">
+      <span class="pb-icon">🪙</span>
+      <div>
+        <h3 data-i18n="pts_title">Dodo Points — get rewarded for being smart</h3>
+        <p data-i18n="pts_sub">Earn points every time you compare, buy or refer a friend. Redeem against your next premium, mobile top-ups or fuel vouchers. 500 points free when you sign up.</p>
+      </div>
+      <button class="btn-gold" onclick="showToast('🪙 +500 Dodo Points credited — welcome aboard!')" data-i18n="pts_btn">Claim my 500 points</button>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="center reveal">
+      <span class="eyebrow" data-i18n="rev_eyebrow">★ 4.8 from 3,200+ reviews</span>
+      <h2 class="sec-title" data-i18n="rev_title">Trusted across the island</h2>
+      <p class="sec-sub" data-i18n="rev_sub">Real reviews from real customers</p>
+    </div>
+    <div class="rev-grid reveal">
+      <div class="rev-card"><div class="rev-stars">★★★★★</div><p class="rev-text">"Mo finn compare 8 plans en 5 minites ek sauv MUR 4,800 par an lor mo l'assurance santé. Platform-la vraiment fasil pou servi!"</p><div class="rev-who"><div class="rev-avi" style="background:#0E9594;">RB</div><div><div class="rev-name">Ravi Boodhoo<span class="verified">✓ Verified</span></div><div class="rev-loc">Quatre Bornes · Health Insurance</div></div></div></div>
+      <div class="rev-card"><div class="rev-stars">★★★★★</div><p class="rev-text">"Renewed my car insurance during lunch break. Comprehensive cover with cyclone protection, cheaper than my old policy. The Dodo assistant even explained my excess in Kreol!"</p><div class="rev-who"><div class="rev-avi" style="background:#06D6A0;">SN</div><div><div class="rev-name">Shivani Nundlall<span class="verified">✓ Verified</span></div><div class="rev-loc">Curepipe · Motor Insurance</div></div></div></div>
+      <div class="rev-card"><div class="rev-stars">★★★★★</div><p class="rev-text">"The risk map showed me my villa sits in a high flood zone — so I picked a plan with zero excess on cyclone claims. My Grand Baie home is properly protected now."</p><div class="rev-who"><div class="rev-avi" style="background:#FFC145;">JM</div><div><div class="rev-name">Jean-Marc Lecourt<span class="verified">✓ Verified</span></div><div class="rev-loc">Grand Baie · Home Insurance</div></div></div></div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="quiz-band reveal">
+      <div>
+        <h3 data-i18n="quiz_title">🎓 What's your Insurance IQ?</h3>
+        <p data-i18n="quiz_sub">5 quick questions on excess, no-claims bonus and cyclone cover. Score 5/5 and earn 200 Dodo Points. Most Mauritians score 2 — can you beat the island average?</p>
+      </div>
+      <button class="btn-quiz" onclick="openQuiz()" data-i18n="quiz_btn">Take the 1-minute quiz →</button>
+    </div>
+
+    <!-- FAQ -->
+    <div class="center reveal">
+      <h2 class="sec-title" data-i18n="faq_title">Frequently asked questions</h2>
+      <p class="sec-sub" data-i18n="faq_sub">Everything you need to know</p>
+    </div>
+    <div class="faq-wrap reveal">
+      <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q">Is OneInsurance really free to use? <span class="chev">▼</span></div><div class="faq-a"><div class="faq-a-inner">Yes — 100% free, forever. We earn a commission from insurers when you buy a policy, so you never pay us anything. The price you see is the same or better than going direct.</div></div></div>
+      <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q">How do you compare prices from all insurers? <span class="chev">▼</span></div><div class="faq-a"><div class="faq-a-inner">Our aggregator engine connects to insurer pricing systems and fetches live quotes based on your details. All results are normalised so you compare like-for-like coverage — not just headline prices. Each plan also gets a Coverage Score out of 100.</div></div></div>
+      <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q">Is my cyclone &amp; flood damage covered? <span class="chev">▼</span></div><div class="faq-a"><div class="faq-a-inner">Every home &amp; motor plan we show clearly labels cyclone and flood cover. Use the "Cyclone cover" filter on the results page, and check the Moris Risk Map to understand your district's exposure. Essential for Mauritius — especially Nov–May.</div></div></div>
+      <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q">How do I pay? Can I use Juice, Blink or MyT Money? <span class="chev">▼</span></div><div class="faq-a"><div class="faq-a-inner">Yes! We accept Visa/Mastercard, bank transfer, Juice by MCB, Blink by Emtel and MyT Money. All payments are 256-bit SSL encrypted and processed securely.</div></div></div>
+      <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q">What happens when my policy expires? <span class="chev">▼</span></div><div class="faq-a"><div class="faq-a-inner">We send renewal reminders 30 days before expiry by SMS, email and WhatsApp — and automatically re-compare the whole market so you always renew at the best available price. No lapses, no surprises.</div></div></div>
+      <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q">What is a no-claims bonus (NCB)? <span class="chev">▼</span></div><div class="faq-a"><div class="faq-a-inner">Every year you drive without claiming, your insurer gives you a discount at renewal — up to 60% in Mauritius after several claim-free years. When you switch insurers through us, your NCB follows you. We show NCB protection options on every motor quote.</div></div></div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-banner reveal">
+      <h2 data-i18n="cta_title">Ready to stop overpaying?</h2>
+      <p data-i18n="cta_sub">Join 52,000+ Mauritians who compare before they buy. Takes 60 seconds.</p>
+      <button class="btn-hero" onclick="startWizard('motor')" data-i18n="cta_btn">🚀 Get My Free Quote Now</button>
+    </div>
+  </main>
+
+  <footer>
+    <div class="foot-inner">
+      <div class="foot-brand">
+        <div class="brand"><div class="brand-mark">🦤</div><div class="brand-name" style="color:#fff;">One<b style="color:var(--gold);">Insurance</b></div></div>
+        <p>Mauritius's independent insurance comparison platform. FSC-licensed broker. Compare 15+ insurers, buy online, manage everything in one dashboard — in English, French or Kreol.</p>
+      </div>
+      <div class="foot-col"><h4>Products</h4><a onclick="startWizard('motor')">Motor Insurance</a><a onclick="startWizard('health')">Health Insurance</a><a onclick="startWizard('life')">Life Insurance</a><a onclick="startWizard('travel')">Travel Insurance</a><a onclick="startWizard('home')">Home Insurance</a></div>
+      <div class="foot-col"><h4>Tools</h4><a onclick="document.getElementById('calculator').scrollIntoView({behavior:'smooth'})">Savings Calculator</a><a onclick="document.getElementById('riskmap').scrollIntoView({behavior:'smooth'})">Moris Risk Map</a><a onclick="openQuiz()">Insurance IQ Quiz</a><a onclick="openCyclone()">Cyclone Prep Centre</a><a onclick="showPage('claims')">Claims Centre</a></div>
+      <div class="foot-col"><h4>Contact</h4><a>📞 +230 5XXX XXXX</a><a>✉️ hello@oneinsurance.mu</a><a>💬 WhatsApp Support</a><a>📍 Port Louis, Mauritius</a></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 OneInsurance Ltd, Mauritius. All rights reserved. Regulated by the FSC.</span><span>Privacy Policy · Terms of Use · Cookie Policy</span></div>
+  </footer>
+</div>
+
+<!-- ═══════════ WIZARD ═══════════ -->
+<div id="page-wizard" class="page">
+  <div class="wizard-shell">
+    <div class="wiz-top">
+      <button class="wiz-back" onclick="wizardBack()">← Back</button>
+      <span class="wiz-secure">🔒 Your data is encrypted &amp; never sold</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="wiz-progress"></div></div>
+    <div class="progress-label"><span id="wiz-step-label">Step 1 of 4</span><span id="wiz-pct">25%</span></div>
+    <div class="wiz-card" id="wiz-card"></div>
+    <div class="wiz-trust"><span>✓ Free forever</span><span>✓ No spam calls</span><span>✓ FSC-licensed broker</span><span>✓ 15+ insurers</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ AGGREGATOR SEARCH ═══════════ -->
+<div id="page-search" class="page">
+  <div class="agg-shell">
+    <div class="agg-radar"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="core">🦤</div></div>
+    <h2 class="agg-title">Dodo is scanning 15+ insurers…</h2>
+    <p class="agg-sub" id="agg-sub">Fetching live quotes — this takes about 8 seconds</p>
+    <div class="agg-list" id="agg-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════ RESULTS ═══════════ -->
+<div id="page-results" class="page">
+  <div class="res-header">
+    <div class="res-header-inner">
+      <div>
+        <h2 id="res-title">Your Quotes</h2>
+        <p class="rh-sub" id="res-sub"></p>
+      </div>
+      <div class="rh-summary" id="res-chips"></div>
+    </div>
+  </div>
+  <div class="res-body">
+    <div class="filters">
+      <h3>Refine results</h3>
+      <div class="f-group"><label>Max monthly premium</label><input type="range" min="100" max="15000" value="15000" id="f-price" oninput="document.getElementById('f-price-lbl').textContent='MUR '+Number(this.value).toLocaleString();renderDeals()"><span id="f-price-lbl" style="font-size:12px;color:var(--muted);font-weight:700;">MUR 15,000</span></div>
+      <div class="f-group"><label>Insurer</label><div class="f-chips" id="f-insurers"></div></div>
+      <div class="f-group"><label>Must include</label><div class="f-chips">
+        <span class="f-chip" onclick="toggleFeatFilter(this,'Cyclone')">Cyclone cover</span>
+        <span class="f-chip" onclick="toggleFeatFilter(this,'Online claim')">Online claims</span>
+        <span class="f-chip" onclick="toggleFeatFilter(this,'Cashless')">Cashless</span>
+        <span class="f-chip" onclick="toggleFeatFilter(this,'No excess')">No excess</span>
+      </div></div>
+      <button onclick="resetFilters()" style="width:100%;background:none;border:1.5px solid var(--border);color:var(--muted);padding:9px;border-radius:11px;font-size:12px;font-weight:800;cursor:pointer;">Reset filters</button>
+    </div>
+    <div>
+      <div class="sort-bar">
+        <span style="font-size:12.5px;font-weight:800;color:var(--muted);">Sort:</span>
+        <span class="sort-chip on" onclick="setSort(this,'price')">💰 Cheapest first</span>
+        <span class="sort-chip" onclick="setSort(this,'rating')">⭐ Best rated</span>
+        <span class="sort-chip" onclick="setSort(this,'value')">🏆 Best value</span>
+        <span class="sort-chip" onclick="setSort(this,'score')">🛡️ Coverage score</span>
+      </div>
+      <p class="res-count" id="res-count"></p>
+      <div id="deals-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- checkout -->
+<div id="page-checkout" class="page">
+  <div class="res-header"><div class="res-header-inner"><div><h2>Secure Checkout</h2><p class="rh-sub">256-bit SSL encrypted</p></div><button class="btn-cmp-clear" style="color:#fff;border-color:rgba(255,255,255,0.3);" onclick="showPage('results')">← Back to quotes</button></div></div>
+  <div class="co-shell">
+    <div class="co-steps">
+      <div class="co-step act"><div class="co-dot">1</div>Your Details</div><div class="co-line"></div>
+      <div class="co-step"><div class="co-dot">2</div>Payment</div><div class="co-line"></div>
+      <div class="co-step"><div class="co-dot">3</div>Covered!</div>
+    </div>
+    <div class="summary-strip" id="co-summary"></div>
+    <div class="co-card"><h3>Personal details</h3>
+      <div class="fgrid">
+        <div class="ffield"><label>First name</label><input type="text" placeholder="Ravi"></div>
+        <div class="ffield"><label>Last name</label><input type="text" placeholder="Boodhoo"></div>
+        <div class="ffield"><label>Email</label><input type="email" placeholder="ravi@email.com"></div>
+        <div class="ffield"><label>Mobile</label><input type="tel" placeholder="+230 5XXX XXXX"></div>
+        <div class="ffield"><label>NID / Passport</label><input type="text" placeholder="R1234567890123"></div>
+        <div class="ffield"><label>Date of birth</label><input type="date"></div>
+        <div class="ffield full"><label>Address</label><input type="text" placeholder="123 Royal Road"></div>
+        <div class="ffield"><label>District</label><select><option>Port Louis</option><option>Plaines Wilhems</option><option>Grand Port</option><option>Flacq</option><option>Moka</option><option>Pamplemousses</option><option>Rivière du Rempart</option><option>Savanne</option><option>Black River</option></select></div>
+        <div class="ffield"><label>City / Village</label><input type="text" placeholder="Curepipe"></div>
+      </div>
+    </div>
+    <div class="co-card"><h3>Payment method</h3>
+      <div class="pay-row">
+        <div class="pay-opt sel" onclick="selPay(this)"><div class="pi">💳</div><div class="pl">Card</div></div>
+        <div class="pay-opt" onclick="selPay(this)"><div class="pi">🧃</div><div class="pl">Juice by MCB</div></div>
+        <div class="pay-opt" onclick="selPay(this)"><div class="pi">⚡</div><div class="pl">Blink by Emtel</div></div>
+        <div class="pay-opt" onclick="selPay(this)"><div class="pi">📱</div><div class="pl">MyT Money</div></div>
+        <div class="pay-opt" onclick="selPay(this)"><div class="pi">🏦</div><div class="pl">Bank Transfer</div></div>
+      </div>
+      <div class="fgrid">
+        <div class="ffield full"><label>Card number</label><input type="text" placeholder="1234 5678 9012 3456"></div>
+        <div class="ffield"><label>Expiry</label><input type="text" placeholder="MM / YY"></div>
+        <div class="ffield"><label>CVV</label><input type="text" placeholder="•••"></div>
+      </div>
+      <button class="btn-pay" onclick="completePurchase()">🔒 Confirm &amp; Pay — Get Covered Now</button>
+      <p style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:10px;">Instant policy document by email &amp; WhatsApp · Cancel within 14 days for full refund</p>
+    </div>
+  </div>
+</div>
+
+<!-- success -->
+<div id="page-success" class="page">
+  <div class="co-shell" style="text-align:center;padding-top:3rem;">
+    <div style="width:86px;height:86px;background:rgba(6,214,160,0.14);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 1.4rem;">🎉</div>
+    <h2 style="font-size:28px;font-weight:700;margin-bottom:0.6rem;">You're covered!</h2>
+    <p style="font-size:14.5px;color:var(--muted);margin-bottom:2rem;line-height:1.7;">Your policy is active. We've emailed your policy document,<br>sent it on WhatsApp, and added it to your dashboard. <b style="color:var(--gold);">+250 Dodo Points earned 🪙</b></p>
+    <div class="co-card" style="text-align:left;">
+      <h3>Policy summary</h3>
+      <div id="success-summary"></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-pay" style="width:auto;padding:14px 30px;" onclick="showPage('account')">View My Policies →</button>
+      <button class="btn-cmp-clear" style="padding:14px 26px;" onclick="showToast('📄 Policy PDF downloaded');">📥 Download Policy</button>
+    </div>
+  </div>
+</div>
+
+<!-- account / dashboard -->
+<div id="page-account" class="page">
+  <div class="res-header"><div class="res-header-inner"><div><h2>Mon Compte</h2><p class="rh-sub">Manage your policies, points &amp; renewals</p></div><button class="btn-cmp-clear" style="color:#fff;border-color:rgba(255,255,255,0.3);" onclick="showPage('home')">← Home</button></div></div>
+  <div class="dash-shell">
+    <div class="dash-head">
+      <div class="dash-avi" id="d-avi">RB</div>
+      <div style="flex:1;"><div style="font-size:17px;font-weight:800;" id="d-name">Ravi Boodhoo</div><div style="font-size:12.5px;color:var(--muted);" id="d-mail">ravi@email.com · +230 5XXX XXXX</div></div>
+      <button class="btn-cmp-clear" onclick="showToast('✏️ Profile editor opens here')">Edit Profile</button>
+    </div>
+    <div id="renewal-alerts"></div>
+    <div class="dash-stats">
+      <div class="ds-cell"><div class="ds-num" id="d-count">0</div><div class="ds-lbl">Active Policies</div></div>
+      <div class="ds-cell"><div class="ds-num" id="d-premium" style="color:var(--green);">MUR 0</div><div class="ds-lbl">Monthly Premiums</div></div>
+      <div class="ds-cell"><div class="ds-num" style="color:var(--gold);" id="d-points">750</div><div class="ds-lbl">🪙 Dodo Points</div></div>
+      <div class="ds-cell"><div class="ds-num">0</div><div class="ds-lbl">Open Claims</div></div>
+    </div>
+    <div class="co-card"><h3>My Policies</h3><div id="d-policies"></div></div>
+    <div class="co-card"><h3>Quick Actions</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <button onclick="showPage('claims')" style="background:var(--bg);border:1.5px solid var(--border);border-radius:13px;padding:1rem;cursor:pointer;text-align:center;color:var(--ink);"><div style="font-size:22px;margin-bottom:5px;">📋</div><div style="font-size:12px;font-weight:800;">File a Claim</div></button>
+        <button onclick="startWizard('motor')" style="background:rgba(255,107,94,0.07);border:1.5px solid rgba(255,107,94,0.35);border-radius:13px;padding:1rem;cursor:pointer;text-align:center;"><div style="font-size:22px;margin-bottom:5px;">🔄</div><div style="font-size:12px;font-weight:800;color:var(--coral);">Renew / Re-compare</div></button>
+        <button onclick="showToast('📄 Documents downloading...')" style="background:var(--bg);border:1.5px solid var(--border);border-radius:13px;padding:1rem;cursor:pointer;text-align:center;color:var(--ink);"><div style="font-size:22px;margin-bottom:5px;">📥</div><div style="font-size:12px;font-weight:800;">My Documents</div></button>
+        <button onclick="toggleDodo()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:13px;padding:1rem;cursor:pointer;text-align:center;color:var(--ink);"><div style="font-size:22px;margin-bottom:5px;">🦤</div><div style="font-size:12px;font-weight:800;">Ask Dodo</div></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CLAIMS CENTRE ═══════════ -->
+<div id="page-claims" class="page">
+  <div class="res-header"><div class="res-header-inner">
+    <div><h2 data-i18n="cl_title">📋 Claims Centre</h2><p class="rh-sub" data-i18n="cl_sub">File a new claim or track an existing one — most claims processed in 5–10 days</p></div>
+    <button class="btn-cmp-clear" style="color:#fff;border-color:rgba(255,255,255,0.3);" onclick="showPage('home')">← Home</button>
+  </div></div>
+  <div class="dash-shell">
+    <div style="display:flex;border:1.5px solid var(--border);border-radius:15px;overflow:hidden;margin-bottom:1.4rem;background:var(--card);">
+      <button id="cl-tab-file" onclick="claimTab('file')" style="flex:1;padding:14px;font-size:14px;font-weight:800;border:none;background:var(--deep);color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;" data-i18n="cl_tab_file">📝 File a Claim</button>
+      <button id="cl-tab-track" onclick="claimTab('track')" style="flex:1;padding:14px;font-size:14px;font-weight:800;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;" data-i18n="cl_tab_track">🔎 Track My Claims</button>
+    </div>
+    <div id="cl-file">
+      <div class="co-card">
+        <h3 data-i18n="cl_f1">1. Which policy is this claim for?</h3>
+        <div id="cl-policy-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+      <div class="co-card">
+        <h3 data-i18n="cl_f2">2. What happened?</h3>
+        <div class="opt-grid three" style="margin-bottom:0;">
+          <div class="opt-card" onclick="pickClaimType(this,'Accident / Collision')"><div class="opt-icon">💥</div><div class="opt-label">Accident</div><div class="opt-sub">Vehicle collision</div></div>
+          <div class="opt-card" onclick="pickClaimType(this,'Theft / Burglary')"><div class="opt-icon">🔓</div><div class="opt-label">Theft</div><div class="opt-sub">Stolen property</div></div>
+          <div class="opt-card" onclick="pickClaimType(this,'Cyclone / Weather')"><div class="opt-icon">🌀</div><div class="opt-label">Cyclone / Flood</div><div class="opt-sub">Weather damage</div></div>
+          <div class="opt-card" onclick="pickClaimType(this,'Medical / Hospital')"><div class="opt-icon">🏥</div><div class="opt-label">Medical</div><div class="opt-sub">Hospital &amp; treatment</div></div>
+          <div class="opt-card" onclick="pickClaimType(this,'Travel Incident')"><div class="opt-icon">✈️</div><div class="opt-label">Travel</div><div class="opt-sub">Delay, baggage, cancel</div></div>
+          <div class="opt-card" onclick="pickClaimType(this,'Other')"><div class="opt-icon">📄</div><div class="opt-label">Other</div><div class="opt-sub">Anything else</div></div>
+        </div>
+      </div>
+      <div class="co-card">
+        <h3 data-i18n="cl_f3">3. Claim details</h3>
+        <div class="fgrid">
+          <div class="ffield"><label>Date of incident</label><input type="date" id="cl-date"></div>
+          <div class="ffield"><label>Estimated amount (MUR)</label><input type="number" id="cl-amount" placeholder="e.g. 25000"></div>
+          <div class="ffield full"><label>Describe what happened</label><input type="text" id="cl-desc" placeholder="Brief description of the incident..."></div>
+          <div class="ffield full"><label>Upload photos / documents</label>
+            <div onclick="showToast('📎 File picker opens here — photos, police report, invoices')" style="border:2px dashed var(--border);border-radius:13px;padding:1.6rem;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;">📎 Click to upload photos, police report, invoices<br><span style="font-size:11px;">JPG, PNG or PDF · max 10MB each</span></div>
+          </div>
+        </div>
+        <button class="btn-pay" onclick="submitClaim()" data-i18n="cl_submit">📤 Submit My Claim</button>
+        <p style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:10px;">You'll receive an SMS confirmation with your claim reference · An advisor calls within 24h</p>
+      </div>
+    </div>
+    <div id="cl-track" style="display:none;"><div id="cl-track-list"></div></div>
+  </div>
+</div>
+
+<!-- compare bar -->
+<div id="cmp-bar"><div class="cmp-inner">
+  <span class="cmp-title">Compare</span>
+  <div class="cmp-slots" id="cmp-slots"></div>
+  <button class="btn-cmp-go" id="cmp-go" onclick="openCompare()" disabled>Compare Now →</button>
+  <button class="btn-cmp-clear" onclick="clearCompare()">Clear</button>
+</div></div>
+
+<!-- plan modal -->
+<div class="overlay" id="plan-ov" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="modal">
+    <div class="modal-head"><div><h3 id="pm-name"></h3><p id="pm-sub"></p></div><button class="m-close" onclick="document.getElementById('plan-ov').classList.remove('on')">✕</button></div>
+    <div class="modal-body">
+      <div class="price-hero"><div><div class="ph-amt" id="pm-price"></div><span class="ph-per">per month</span></div><span class="dc-save" id="pm-save"></span></div>
+      <div class="m-sec"><h4>What's covered</h4><div id="pm-features"></div></div>
+      <div class="m-sec"><h4>Details</h4><p style="font-size:13.5px;color:var(--muted);line-height:1.7;" id="pm-details"></p></div>
+      <div class="m-actions">
+        <button class="btn-buy" onclick="goCheckout()">🚀 Buy This Plan →</button>
+        <button class="btn-call" onclick="document.getElementById('plan-ov').classList.remove('on');showToast('📞 An advisor will call you within 2 hours')">📞 Call Me Back</button>
+      </div>
+      <div style="display:flex;justify-content:center;gap:1.2rem;margin-top:1rem;font-size:11px;color:var(--muted);"><span>🔒 Secure payment</span><span>📄 Instant policy</span><span>↩️ 14-day refund</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- compare modal -->
+<div class="overlay" id="cmp-ov" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="modal wide">
+    <div class="modal-head"><div><h3>Side-by-side comparison</h3><p id="cm-sub"></p></div><button class="m-close" onclick="document.getElementById('cmp-ov').classList.remove('on')">✕</button></div>
+    <div class="modal-body"><div style="overflow-x:auto;" id="cm-table"></div></div>
+  </div>
+</div>
+
+<!-- cyclone modal -->
+<div class="overlay" id="cyc-ov" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="modal">
+    <div class="modal-head"><div><h3>🌀 Cyclone Prep Centre</h3><p>Season: November – May · Powered by Mauritius Meteorological Services classes</p></div><button class="m-close" onclick="document.getElementById('cyc-ov').classList.remove('on')">✕</button></div>
+    <div class="modal-body">
+      <div class="cyc-level">
+        <div class="cyc-pill active-lvl"><b style="color:var(--green);">All clear</b><span>No warning</span></div>
+        <div class="cyc-pill"><b style="color:var(--gold);">Class I–II</b><span>36–12h before gusts</span></div>
+        <div class="cyc-pill"><b style="color:var(--coral);">Class III</b><span>Gusts likely, 6h</span></div>
+        <div class="cyc-pill"><b style="color:#C81E1E;">Class IV</b><span>Gusts 120km/h+</span></div>
+      </div>
+      <div class="m-sec"><h4>Your pre-season checklist</h4>
+        <div id="cyc-checks">
+          <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Check your home policy includes cyclone &amp; flood cover (not all do!)</div>
+          <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Photograph your home, roof &amp; contents — timestamped proof speeds up claims</div>
+          <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Confirm your car is comprehensive, not just third party (cyclone damage isn't covered on TP)</div>
+          <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Save your insurer's 24/7 claims hotline in your phone</div>
+          <div class="check-li" onclick="this.classList.toggle('done')"><span class="cb">✓</span>Keep policy documents in cloud storage, not just paper</div>
+        </div>
+      </div>
+      <div class="m-sec"><h4>After a cyclone</h4>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;">Report damage within 7 days. File through our Claims Centre with photos — cyclone claims are fast-tracked and most insurers waive excess if your plan includes "zero excess on cyclone". Class III/IV events trigger our priority claims line.</p>
+      </div>
+      <button class="btn-pay" onclick="document.getElementById('cyc-ov').classList.remove('on');startWizard('home')">🏠 Compare cyclone-ready home cover</button>
+    </div>
+  </div>
+</div>
+
+<!-- quiz modal -->
+<div class="overlay" id="quiz-ov" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="modal">
+    <div class="modal-head"><div><h3>🎓 Insurance IQ Quiz</h3><p>5 questions · beat the island average of 2/5</p></div><button class="m-close" onclick="document.getElementById('quiz-ov').classList.remove('on')">✕</button></div>
+    <div class="modal-body" id="quiz-body"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════ DATA ═══════════ */
+const INSURERS = [
+  {code:'SWAN', name:'Swan Insurance', color:'#0B3C6E'},
+  {code:'SICOM', name:'SICOM', color:'#0E7C4A'},
+  {code:'MUA', name:'MUA Insurance', color:'#6D28D9'},
+  {code:'EAGLE', name:'Mauritian Eagle', color:'#B45309'},
+  {code:'ANGLO', name:'Anglo-Mauritius', color:'#9F1239'},
+  {code:'JUB', name:'Jubilee Insurance', color:'#C2410C'},
+  {code:'SBM', name:'SBM Assurance', color:'#0369A1'},
+  {code:'CIM', name:'CIM Insurance', color:'#BE185D'},
+];
+
+const CATALOG = {
+  motor: [
+    {id:'m1',ins:0,name:'AutoShield Comprehensive',price:3200,rating:4.8,score:94,cover:'Comprehensive',best:true,feats:['Cyclone cover','0% excess option','24/7 roadside','Courtesy car','Online claim'],desc:'The most complete motor cover in Mauritius — cyclone, flood and natural perils included as standard.'},
+    {id:'m2',ins:2,name:'DriveGuard Plus',price:2950,rating:4.6,score:88,cover:'Comprehensive',feats:['Cyclone cover','24/7 breakdown','Online claim','No-claims bonus 50%'],desc:'Great value comprehensive plan with round-the-clock roadside assistance across the island.'},
+    {id:'m3',ins:7,name:'FlexiDrive',price:2700,rating:4.4,score:82,cover:'Comprehensive',feats:['Cyclone cover','Flexible excess','No-claims bonus 60%','Key replacement'],desc:'Choose your own excess level from MUR 0 to 10,000 to fit your budget.'},
+    {id:'m4',ins:1,name:'SICOM Motor Third Party',price:1400,rating:4.3,score:58,cover:'Third Party',cheapest:true,feats:['RTA compliant','Personal accident','Passenger liability','Same-day renewal'],desc:'The lowest legal cover in Mauritius — perfect for older vehicles.'},
+    {id:'m5',ins:4,name:'AutoPremier Agreed Value',price:4100,rating:4.7,score:97,cover:'Comprehensive+',feats:['Cyclone cover','Agreed value payout','Courtesy car','No excess'],desc:'Premium plan with agreed-value payout — ideal for newer or high-value vehicles.'},
+    {id:'m6',ins:6,name:'SBM DriveBasic',price:1750,rating:4.1,score:66,cover:'Third Party Fire & Theft',feats:['Fire & theft','RTA compliant','Bank-linked payment'],desc:'Affordable middle option covering fire and theft on top of third party.'},
+  ],
+  health: [
+    {id:'h1',ins:0,name:'MediCare Plus Family',price:1200,rating:4.9,score:95,cover:'MUR 500K/yr',best:true,feats:['Cashless 40+ clinics','Réunion network','Maternity cover','Dental add-on','Online claim'],desc:'Best-in-class family health cover with local and Réunion hospital networks.'},
+    {id:'h2',ins:2,name:'HealthPlan Family',price:950,rating:4.6,score:86,cover:'MUR 300K/yr',feats:['Cashless','Family floater','Wellness checkups','Online claim'],desc:'Solid family floater plan with free annual health checkups included.'},
+    {id:'h3',ins:1,name:'SICOM Santé',price:880,rating:4.5,score:79,cover:'MUR 250K/yr',cheapest:true,feats:['No waiting on accidents','Ambulance included','Monthly payment'],desc:'Affordable state-linked cover — no waiting period for accident claims.'},
+    {id:'h4',ins:5,name:'Jubilee International',price:2800,rating:4.7,score:98,cover:'USD 1M/yr',feats:['Worldwide cover','Medical evacuation','Private room','24/7 helpline'],desc:'Full international health cover for expats and frequent travellers.'},
+    {id:'h5',ins:6,name:'SBM HealthBasic',price:650,rating:4.2,score:64,cover:'MUR 150K/yr',feats:['Bank-linked','Entry-level','Day-care covered'],desc:'Budget-friendly starter plan for individuals.'},
+  ],
+  life: [
+    {id:'l1',ins:0,name:'LifeSecure 2.5M',price:479,rating:4.8,score:93,cover:'MUR 2.5M',best:true,feats:['No medical exam','Critical illness rider','Online claim','Waiver on disability'],desc:'Market-leading term plan with critical illness rider included as standard.'},
+    {id:'l2',ins:1,name:'SICOM Pure Term',price:520,rating:4.7,score:89,cover:'MUR 2.5M',feats:['State-backed','Accidental death 2x','Renewable to 70'],desc:'Trusted government-linked insurer with rock-solid claims record.'},
+    {id:'l3',ins:6,name:'SBM Life Starter',price:380,rating:4.3,score:71,cover:'MUR 1M',cheapest:true,feats:['Bank-linked','Convertible','Entry-level'],desc:'The most affordable way to protect your family — upgradeable any time.'},
+    {id:'l4',ins:4,name:'Anglo Life Premier',price:699,rating:4.6,score:96,cover:'MUR 5M',feats:['Worldwide cover','Fast-track claims 5 days','Estate planning'],desc:'High-cover premium plan with dedicated relationship manager.'},
+    {id:'l5',ins:2,name:'MUA LifeMax',price:610,rating:4.5,score:87,cover:'MUR 3M',feats:['Accidental 2x payout','Cashless','Education benefit'],desc:'Higher cover with double payout on accidental death.'},
+  ],
+  travel: [
+    {id:'t1',ins:0,name:'TravelSafe Worldwide',price:650,rating:4.8,score:94,cover:'EUR 500K medical',best:true,feats:['Flight delay 4h+','Baggage MUR 50K','Trip cancellation','Evacuation'],desc:'Comprehensive single-trip cover accepted for all visa applications.'},
+    {id:'t2',ins:1,name:'SICOM Voyage Schengen',price:500,rating:4.4,score:78,cover:'EUR 200K medical',cheapest:true,feats:['Schengen compliant','No deductible','24/7 assist'],desc:'Schengen-visa-ready cover at the lowest price on the market.'},
+    {id:'t3',ins:2,name:'GlobeTrotter Premium',price:890,rating:4.7,score:97,cover:'USD 1M medical',feats:['Adventure sports','Cancel any reason','Rental car cover'],desc:'Premium plan including adventure sports and cancel-for-any-reason.'},
+    {id:'t4',ins:5,name:'Jubilee Annual Multi-Trip',price:3200,rating:4.6,score:92,cover:'USD 1M medical',feats:['Unlimited trips','Business travel','Family extension'],desc:'One policy, unlimited trips all year — best for frequent flyers.'},
+  ],
+  home: [
+    {id:'ho1',ins:0,name:'HomeSafe All Perils',price:1800,rating:4.9,score:96,cover:'MUR 3M building',best:true,feats:['Cyclone cover','Flood included','Contents MUR 500K','Alt. accommodation'],desc:'Gold-standard home cover with every natural peril Mauritius faces.'},
+    {id:'ho2',ins:2,name:'HomeGuard Standard',price:1600,rating:4.6,score:87,cover:'MUR 3M building',feats:['Cyclone cover','Contents MUR 300K','Online claim','Burglary'],desc:'Building and contents protected with fast online claims.'},
+    {id:'ho3',ins:1,name:'SICOM Habitat',price:1350,rating:4.4,score:80,cover:'MUR 2M building',cheapest:true,feats:['Cyclone cover','No excess on cyclone','Monthly payment'],desc:'Affordable state-backed cover with zero excess on cyclone claims.'},
+    {id:'ho4',ins:4,name:'Villa Premier IRS/RES',price:3500,rating:4.8,score:98,cover:'MUR 10M building',feats:['Cyclone cover','Fine art option','Pool cover','Dedicated claims mgr'],desc:'Specialist cover for luxury villas and IRS/RES properties.'},
+  ],
+  business: [
+    {id:'b1',ins:0,name:'BizShield SME Complete',price:4500,rating:4.8,score:95,cover:'Fire & All Risks',best:true,feats:['Business interruption','Public liability 10M','Cyber add-on','Stock covered'],desc:'Complete SME package — fire, liability, interruption and more.'},
+    {id:'b2',ins:2,name:'CommercialPlan Retail',price:3800,rating:4.5,score:84,cover:'Fire & Perils',feats:['Flexible modules','Glass breakage','Staff accident'],desc:'Modular commercial cover tailored for retail and services.'},
+    {id:'b3',ins:1,name:'SICOM Business Basic',price:3200,rating:4.3,score:74,cover:'Fire & Perils',cheapest:true,feats:['State-backed','Monthly payment','Stock included'],desc:'Entry-level fire and perils cover for small businesses.'},
+    {id:'b4',ins:4,name:'Anglo Corporate All Risks',price:12000,rating:4.7,score:99,cover:'All Risks',feats:['D&O liability','Prof. indemnity','Group life','Risk consultancy'],desc:'Comprehensive corporate risk package for larger enterprises.'},
+  ],
+};
+
+const PRODUCT_META = {
+  motor:{label:'Motor Insurance',icon:'🚗'}, health:{label:'Health Insurance',icon:'🏥'},
+  life:{label:'Life Insurance',icon:'🛡️'}, travel:{label:'Travel Insurance',icon:'✈️'},
+  home:{label:'Home Insurance',icon:'🏠'}, business:{label:'Business Insurance',icon:'💼'},
+};
+
+/* ═══════════ WIZARDS ═══════════ */
+const WIZARDS = {
+  motor: [
+    {q:'What do you drive?',hint:'Select your vehicle type',type:'options',key:'vehicle',opts:[
+      {icon:'🚗',label:'Private Car',sub:'Sedan, hatchback, SUV'},{icon:'🏍️',label:'Motorcycle',sub:'All engine sizes'},
+      {icon:'🚐',label:'Minibus / Taxi',sub:'Commercial passenger'},{icon:'🚚',label:'Lorry / Van',sub:'Goods vehicles'}]},
+    {q:'Your vehicle details',hint:'This helps insurers price accurately',type:'fields',fields:[
+      {label:'Registration number',ph:'e.g. 1234 AB 26',key:'reg'},
+      {label:'Make & model',ph:'e.g. Toyota Vitz, Nissan March, Suzuki Swift',key:'model'},
+      {label:'Year of manufacture',type:'select',key:'year',opts:['2026','2025','2024','2023','2022','2020–2021','2016–2019','Before 2016']}]},
+    {q:'What cover do you want?',hint:'You can compare all levels on the next screen',type:'options',key:'cover',opts:[
+      {icon:'🥉',label:'Third Party',sub:'Legal minimum, cheapest'},{icon:'🥈',label:'Third Party Fire & Theft',sub:'+ fire & theft protection'},
+      {icon:'🥇',label:'Comprehensive',sub:'Full cover incl. cyclone'},{icon:'🤔',label:'Show me everything',sub:'Compare all options'}]},
+    {q:'Almost done!',hint:'Where should we send your quotes?',type:'fields',fields:[
+      {label:'Your name',ph:'Ravi Boodhoo',key:'name'},
+      {label:'Mobile number',ph:'+230 5XXX XXXX',key:'phone'},
+      {label:'District',type:'select',key:'district',opts:['Port Louis','Plaines Wilhems','Grand Port','Flacq','Moka','Pamplemousses','Rivière du Rempart','Savanne','Black River']}]},
+  ],
+  health: [
+    {q:'Who needs cover?',hint:'Select who the plan is for',type:'options',key:'who',opts:[
+      {icon:'🙋',label:'Just me',sub:'Individual plan'},{icon:'👫',label:'Me + spouse',sub:'Couple plan'},
+      {icon:'👨‍👩‍👧‍👦',label:'My family',sub:'Family floater'},{icon:'👴',label:'My parents',sub:'Senior plans'}]},
+    {q:'Where do you want treatment?',hint:'Wider networks cost more',type:'options',key:'network',opts:[
+      {icon:'🇲🇺',label:'Mauritius only',sub:'Local clinics & hospitals'},{icon:'🏝️',label:'Mauritius + Réunion',sub:'Regional network'},
+      {icon:'🌍',label:'International',sub:'Worldwide cover'}]},
+    {q:'Eldest member\'s age?',hint:'Age of the oldest person to be covered',type:'fields',fields:[
+      {label:'Age',ph:'e.g. 38',key:'age'},
+      {label:'Any pre-existing conditions?',type:'select',key:'pre',opts:['None','Diabetes','Hypertension','Other / Multiple']}]},
+    {q:'Almost done!',hint:'Where should we send your quotes?',type:'fields',fields:[
+      {label:'Your name',ph:'Ravi Boodhoo',key:'name'},{label:'Mobile number',ph:'+230 5XXX XXXX',key:'phone'}]},
+  ],
+  life: [
+    {q:'How much cover do you need?',hint:'Rule of thumb: 10× your annual income',type:'options',key:'sum',opts:[
+      {icon:'💚',label:'MUR 1M',sub:'Starter protection'},{icon:'💙',label:'MUR 2.5M',sub:'Most popular'},
+      {icon:'💜',label:'MUR 5M',sub:'Full family security'},{icon:'🖤',label:'Not sure',sub:'Show me all options'}]},
+    {q:'About you',hint:'Insurers price on age & smoking status',type:'fields',fields:[
+      {label:'Date of birth',type:'date',key:'dob'},
+      {label:'Do you smoke?',type:'select',key:'smoke',opts:['No','Yes','Quit >2 years ago']},
+      {label:'Occupation',ph:'e.g. Teacher',key:'job'}]},
+    {q:'Almost done!',hint:'Where should we send your quotes?',type:'fields',fields:[
+      {label:'Your name',ph:'Ravi Boodhoo',key:'name'},{label:'Mobile number',ph:'+230 5XXX XXXX',key:'phone'}]},
+  ],
+  travel: [
+    {q:'Where are you going?',hint:'Different regions, different prices',type:'options',key:'dest',opts:[
+      {icon:'🇪🇺',label:'Europe / Schengen',sub:'Visa-compliant plans'},{icon:'🌏',label:'Asia / Dubai',sub:'Popular routes'},
+      {icon:'🌍',label:'Worldwide',sub:'Including USA/Canada'},{icon:'🏝️',label:'Regional',sub:'Réunion, Rodrigues, Africa'}]},
+    {q:'Trip details',hint:'',type:'fields',fields:[
+      {label:'Departure date',type:'date',key:'dep'},{label:'Return date',type:'date',key:'ret'},
+      {label:'Travellers',type:'select',key:'pax',opts:['1 adult','2 adults','Family (2+2)','Group 5+']}]},
+    {q:'Almost done!',hint:'Where should we send your quotes?',type:'fields',fields:[
+      {label:'Your name',ph:'Ravi Boodhoo',key:'name'},{label:'Mobile number',ph:'+230 5XXX XXXX',key:'phone'}]},
+  ],
+  home: [
+    {q:'What type of property?',hint:'',type:'options',key:'prop',opts:[
+      {icon:'🏠',label:'House',sub:'Individual dwelling'},{icon:'🏢',label:'Apartment',sub:'Flat or condo'},
+      {icon:'🏖️',label:'Villa / IRS / RES',sub:'Luxury property'},{icon:'🔑',label:'Rented (contents only)',sub:'Tenant cover'}]},
+    {q:'Property value & location',hint:'Coastal zones may affect cyclone premium — check the Moris Risk Map',type:'fields',fields:[
+      {label:'Rebuild value',type:'select',key:'value',opts:['MUR 1M','MUR 2M','MUR 3M','MUR 5M','MUR 10M+']},
+      {label:'District',type:'select',key:'district',opts:['Port Louis','Plaines Wilhems','Grand Port','Flacq','Moka','Pamplemousses','Rivière du Rempart','Savanne','Black River']}]},
+    {q:'Almost done!',hint:'Where should we send your quotes?',type:'fields',fields:[
+      {label:'Your name',ph:'Ravi Boodhoo',key:'name'},{label:'Mobile number',ph:'+230 5XXX XXXX',key:'phone'}]},
+  ],
+  business: [
+    {q:'What type of business?',hint:'',type:'options',key:'biz',opts:[
+      {icon:'🛍️',label:'Retail / SME',sub:'Shops & small business'},{icon:'🏨',label:'Hospitality',sub:'Hotels, restaurants'},
+      {icon:'🏭',label:'Manufacturing',sub:'Industrial'},{icon:'💻',label:'Services',sub:'Offices & professional'}]},
+    {q:'What cover do you need?',hint:'Select your priority — you can add more later',type:'options',key:'need',opts:[
+      {icon:'🔥',label:'Fire & Perils',sub:'Property protection'},{icon:'⚖️',label:'Public Liability',sub:'Third-party claims'},
+      {icon:'🛡️',label:'All Risks',sub:'Complete package'},{icon:'👥',label:'Group Life/Health',sub:'Employee benefits'}]},
+    {q:'Almost done!',hint:'Where should we send your quotes?',type:'fields',fields:[
+      {label:'Company name',ph:'ABC Ltd',key:'name'},{label:'Mobile number',ph:'+230 5XXX XXXX',key:'phone'}]},
+  ],
+};
+
+/* ═══════════ DISTRICT RISK DATA ═══════════ */
+const DISTRICTS = {
+  pl:{name:'Port Louis',meta:'Capital · Dense traffic · Coastal flooding history (2013)',cyc:[70,'High'],flood:[85,'Very high'],road:[90,'Very high'],tip:'In Port Louis, prioritise flood & theft cover for vehicles, and check "alternative accommodation" in home policies.'},
+  pam:{name:'Pamplemousses',meta:'North · Fast-growing residential zone',cyc:[65,'High'],flood:[55,'Medium'],road:[70,'High'],tip:'Growing traffic on the M2 — comprehensive motor cover with courtesy car is popular here.'},
+  riv:{name:'Rivière du Rempart',meta:'North coast · Grand Baie tourism belt',cyc:[75,'High'],flood:[60,'Medium-high'],road:[60,'Medium'],tip:'Coastal villas: check contents & pool cover, plus salt-air corrosion exclusions.'},
+  flacq:{name:'Flacq',meta:'East coast · Exposed to cyclone swells',cyc:[85,'Very high'],flood:[70,'High'],road:[55,'Medium'],tip:'East-facing coast takes cyclone swells head-on — zero-excess cyclone cover is worth it.'},
+  moka:{name:'Moka',meta:'Central plateau · Smart city growth',cyc:[55,'Medium'],flood:[40,'Low-med'],road:[65,'High'],tip:'Lower flood risk on the plateau, but hail & heavy-rain events still hit — check "natural perils".'},
+  pw:{name:'Plaines Wilhems',meta:'Most populated · Curepipe, QB, Rose-Hill',cyc:[60,'Medium-high'],flood:[65,'High'],road:[85,'Very high'],tip:'Highest accident density on the island — dashcam discounts and NCB protection pay off.'},
+  gp:{name:'Grand Port',meta:'South-east · Airport & Mahébourg',cyc:[80,'Very high'],flood:[65,'High'],road:[50,'Medium'],tip:'Near the airport? Travel insurance bundles with motor cover often discount here.'},
+  br:{name:'Black River',meta:'West coast · Tamarin, Flic-en-Flac',cyc:[70,'High'],flood:[75,'High'],road:[55,'Medium'],tip:'Flash-flood zones around Tamarin — flood cover + 4x4 breakdown assist recommended.'},
+  sav:{name:'Savanne',meta:'South · Wild coast, heavy rainfall',cyc:[75,'High'],flood:[80,'Very high'],road:[45,'Low-med'],tip:'Highest rainfall on the island — roof damage claims are common; photograph your roof each season.'},
+};
+function pickDist(k){
+  const d=DISTRICTS[k];if(!d)return;
+  document.querySelectorAll('.mu-map .dist').forEach(p=>p.classList.remove('on'));
+  document.getElementById('d-'+k).classList.add('on');
+  document.getElementById('di-name').textContent=d.name;
+  document.getElementById('di-meta').textContent=d.meta;
+  const set=(id,val)=>{document.getElementById('rf-'+id).style.width=val[0]+'%';document.getElementById('rv-'+id).textContent=val[1];};
+  set('cyc',d.cyc);set('flood',d.flood);set('road',d.road);
+  document.getElementById('di-tip').innerHTML='💡 <b>Tip:</b> '+d.tip;
+}
+
+/* ═══════════ STATE ═══════════ */
+let wizProduct='motor', wizStep=0, wizAnswers={}, currentDeals=[], sortMode='price';
+let featFilters=[], insurerFilter=null, compareList=[], selectedDeal=null;
+const userPolicies=[];
+let calcProduct='motor', dodoPoints=750;
+
+/* ═══════════ THEME ═══════════ */
+function toggleTheme(){
+  document.body.classList.toggle('dark');
+  document.getElementById('theme-btn').textContent=document.body.classList.contains('dark')?'☀️':'🌙';
+}
+
+/* ═══════════ COUNT-UP + REVEAL ═══════════ */
+const io=new IntersectionObserver(es=>{es.forEach(e=>{
+  if(!e.isIntersecting)return;
+  e.target.classList.add('vis');
+  e.target.querySelectorAll('[data-count]').forEach(el=>{
+    if(el._done)return;el._done=true;
+    const target=+el.getAttribute('data-count'),fmt=el.getAttribute('data-fmt');
+    const t0=performance.now(),dur=1400;
+    const tick=t=>{const p=Math.min(1,(t-t0)/dur),v=Math.round(target*(1-Math.pow(1-p,3)));
+      el.textContent=fmt==='m'?(v/1000000).toFixed(1)+'M':v.toLocaleString();
+      if(p<1)requestAnimationFrame(tick);};
+    requestAnimationFrame(tick);
+  });
+});},{threshold:0.25});
+
+/* ═══════════ LIVE TICKER ═══════════ */
+const TICKS=[
+  '<b>Kevin from Rose-Hill</b> just saved <b>MUR 3,240/yr</b> on motor cover',
+  '<b>Priya from Flacq</b> found family health cover for <b>MUR 950/mo</b>',
+  '<b>Jean from Tamarin</b> added cyclone cover for <b>MUR 0 extra</b>',
+  '<b>Aisha from Curepipe</b> compared 6 travel plans in <b>48 seconds</b>',
+  '<b>Vikash from Mahébourg</b> earned <b>🪙 250 Dodo Points</b> on renewal',
+];
+let tickIdx=0;
+setInterval(()=>{tickIdx=(tickIdx+1)%TICKS.length;const el=document.getElementById('live-tick');if(el)el.innerHTML=TICKS[tickIdx];},4200);
+
+/* ═══════════ MARQUEE ═══════════ */
+(function(){
+  const names=['SWAN','SICOM','MUA','MAURITIAN EAGLE','ANGLO-MAURITIUS','JUBILEE','SBM ASSURANCE','CIM','LA PRUDENCE','ISLAND GENERAL','+5 MORE'];
+  const el=document.getElementById('marquee');
+  el.innerHTML=(names.concat(names)).map(n=>'<span class="is-logo">'+n+'</span>').join('');
+})();
+
+/* ═══════════ CALCULATOR ═══════════ */
+function calcSet(el,prod){calcProduct=prod;document.querySelectorAll('.calc-prod').forEach(c=>c.classList.remove('on'));el.classList.add('on');calcUpdate();}
+function calcUpdate(){
+  const v=+document.getElementById('calc-range').value;
+  document.getElementById('calc-amt').textContent='MUR '+v.toLocaleString()+' / month';
+  const save=Math.round(v*0.30*12);
+  document.getElementById('calc-save').textContent='MUR '+save.toLocaleString();
+}
+
+/* ═══════════ QUIZ ═══════════ */
+const QUIZ=[
+  {q:'What does "excess" mean on your policy?',opts:['The maximum the insurer pays','The amount YOU pay first on any claim','A penalty for late premiums'],a:1,ex:'The excess (deductible) is the first part of any claim you pay yourself — lower excess usually means higher premium.'},
+  {q:'Does third-party motor insurance cover cyclone damage to YOUR car?',opts:['Yes, always','Only during Class III–IV','No — you need comprehensive'],a:2,ex:'Third party only covers damage you cause to others. Your own cyclone damage needs comprehensive cover.'},
+  {q:'What is the maximum no-claims bonus (NCB) commonly offered in Mauritius?',opts:['Around 60%','25%','10%'],a:0,ex:'After several claim-free years, discounts can reach around 60% — and your NCB follows you when you switch insurers.'},
+  {q:'When is cyclone season in Mauritius?',opts:['June – September','November – May','All year equally'],a:1,ex:'Officially November to May — the best time to review your home & motor cover is October.'},
+  {q:'Is travel insurance mandatory for a Schengen visa?',opts:['No, optional','Yes — min. EUR 30,000 medical cover','Only for stays over 30 days'],a:1,ex:'Schengen visas require proof of at least EUR 30,000 in medical cover for the whole stay.'},
+];
+let qzIdx=0,qzScore=0;
+function openQuiz(){qzIdx=0;qzScore=0;renderQuiz();document.getElementById('quiz-ov').classList.add('on');}
+function renderQuiz(){
+  const b=document.getElementById('quiz-body');
+  if(qzIdx>=QUIZ.length){
+    const msg=qzScore>=4?'🏆 Insurance genius! You beat 95% of the island.':qzScore>=3?'💪 Solid! Better than the island average of 2/5.':'🌱 Good start — Dodo can teach you the rest!';
+    b.innerHTML=`<div style="text-align:center;padding:1rem 0;">
+      <div style="font-size:56px;margin-bottom:8px;">${qzScore>=4?'🏆':qzScore>=3?'💪':'🦤'}</div>
+      <div style="font-size:30px;font-weight:700;font-family:'Space Grotesk',sans-serif;">${qzScore} / ${QUIZ.length}</div>
+      <p style="font-size:14px;color:var(--muted);margin:10px 0 1.4rem;">${msg}${qzScore===5?' <b style="color:var(--gold);">+200 Dodo Points 🪙</b>':''}</p>
+      <button class="btn-pay" onclick="document.getElementById('quiz-ov').classList.remove('on');startWizard('motor')">🚀 Put it into practice — compare quotes</button>
+      <button class="btn-cmp-clear" style="margin-top:10px;width:100%;" onclick="openQuiz()">↻ Try again</button></div>`;
+    return;
+  }
+  const q=QUIZ[qzIdx];
+  b.innerHTML='<div class="qz-progress">QUESTION '+(qzIdx+1)+' / '+QUIZ.length+' · SCORE '+qzScore+'</div><div class="qz-q">'+q.q+'</div>'+
+    q.opts.map((o,i)=>'<button class="qz-opt" onclick="qzPick(this,'+i+')">'+o+'</button>').join('')+
+    '<div id="qz-ex" style="display:none;font-size:12.5px;color:var(--muted);line-height:1.6;background:var(--bg);border-radius:11px;padding:12px;margin-top:6px;"></div>';
+}
+function qzPick(el,i){
+  const q=QUIZ[qzIdx];
+  document.querySelectorAll('.qz-opt').forEach((b,j)=>{b.disabled=true;if(j===q.a)b.classList.add('right');});
+  if(i===q.a){qzScore++;}else{el.classList.add('wrong');}
+  const ex=document.getElementById('qz-ex');ex.style.display='block';ex.innerHTML='💡 '+q.ex;
+  setTimeout(()=>{qzIdx++;renderQuiz();},1900);
+}
+
+/* ═══════════ CYCLONE ═══════════ */
+function openCyclone(){document.getElementById('cyc-ov').classList.add('on');}
+
+/* ═══════════ DODO ASSISTANT ═══════════ */
+const DODO_BRAIN=[
+  {k:['cyclone','siklon','flood','inondation'],r:'🌀 Cyclone season runs Nov–May. Home & comprehensive motor plans on our platform flag cyclone cover clearly — use the "Cyclone cover" filter. Want me to open the Cyclone Prep Centre? Type "prep" or click the top banner!'},
+  {k:['cheap','cheapest','bon marse','pa ser','moins cher'],r:'💰 Cheapest isn\'t always best value! Sort by "Best value" on results — it balances price, rating and coverage score. Third party motor starts at MUR 117/mo, health at MUR 299/mo.'},
+  {k:['third party','tiers'],r:'🚗 Third party is the legal minimum — it covers damage you cause to OTHERS, not your own car. No cyclone, theft or fire cover for you. Comprehensive covers both sides. For cars newer than ~10 years, comprehensive usually makes sense.'},
+  {k:['excess','deductible','franchise'],r:'📖 The excess is what YOU pay first on any claim. Example: MUR 10,000 damage with MUR 2,500 excess → insurer pays MUR 7,500. Some plans offer 0% excess options — filter with "No excess".'},
+  {k:['ncb','no claim','bonus'],r:'🎁 No-Claims Bonus: every claim-free year earns you a bigger renewal discount — up to ~60% in Mauritius. It follows you when you switch insurers through us!'},
+  {k:['claim','reklamasion','sinistre'],r:'📋 To file a claim: go to the Claims Centre (nav bar), pick your policy, tell us what happened, upload photos. Most claims are processed in 5–10 days. Cyclone claims are fast-tracked!'},
+  {k:['pay','juice','myt','blink','payment','peye'],r:'💳 We accept Visa/Mastercard, Juice by MCB, Blink by Emtel, MyT Money and bank transfer. All encrypted, policy delivered instantly by email & WhatsApp.'},
+  {k:['schengen','visa','europe','travel','vwayaz'],r:'✈️ For a Schengen visa you need at least EUR 30,000 medical cover. Our SICOM Voyage plan (MUR 500/trip) is Schengen-compliant and visa-application-ready.'},
+  {k:['health','sante','lasante','medical'],r:'🏥 Health plans start at MUR 299/mo. Key things to compare: cashless clinic network, waiting periods, maternity cover and whether Réunion evacuation is included. Try the health wizard!'},
+  {k:['points','dodo points','reward'],r:'🪙 Dodo Points: 500 free at signup, +250 per policy bought, +200 for a 5/5 quiz score, +300 per friend referred. Redeem against premiums, top-ups or fuel vouchers!'},
+  {k:['bonjour','hello','hi','salam','bonzour'],r:'🦤 Bonzour! Mo Dodo, ou assistant lasirans. Ask me about cyclone cover, excess, NCB, Schengen visas, payments — in English, français ou Kreol!'},
+  {k:['prep'],r:'🌀 Opening the Cyclone Prep Centre for you…',act:'cyclone'},
+];
+function toggleDodo(){
+  const p=document.getElementById('dodo-panel');
+  p.classList.toggle('on');
+  if(p.classList.contains('on')&&!p._init){
+    p._init=true;
+    dodoSay('🦤 Bonzour! I\'m Dodo — your free insurance sidekick. Ask me anything, or tap a question below.');
+    renderDodoSuggs();
+  }
+}
+function renderDodoSuggs(){
+  const suggs=['What is excess?','Cyclone cover?','Cheapest motor plan?','Schengen visa rules','Dodo Points?'];
+  document.getElementById('dp-sugg').innerHTML=suggs.map(s=>'<span class="dp-chip" onclick="dodoAsk(\''+s.replace(/'/g,"\\'")+'\')">'+s+'</span>').join('');
+}
+function dodoSay(txt){const m=document.getElementById('dp-msgs');m.insertAdjacentHTML('beforeend','<div class="dp-msg bot">'+txt+'</div>');m.scrollTop=m.scrollHeight;}
+function dodoUser(txt){const m=document.getElementById('dp-msgs');m.insertAdjacentHTML('beforeend','<div class="dp-msg user">'+txt.replace(/</g,'&lt;')+'</div>');m.scrollTop=m.scrollHeight;}
+function dodoAsk(q){document.getElementById('dp-in').value=q;dodoSend();}
+function dodoSend(){
+  const inp=document.getElementById('dp-in');const q=inp.value.trim();if(!q)return;
+  dodoUser(q);inp.value='';
+  const ql=q.toLowerCase();
+  const hit=DODO_BRAIN.find(b=>b.k.some(k=>ql.includes(k)));
+  setTimeout(()=>{
+    if(hit){dodoSay(hit.r);if(hit.act==='cyclone')setTimeout(openCyclone,600);}
+    else dodoSay('🤔 Hmm, I\'m still learning that one! Try asking about: excess, cyclone cover, NCB, third party vs comprehensive, claims, payments or Schengen visas. Or tap 💬 WhatsApp (bottom left) for a human advisor.');
+  },550);
+}
+
+/* ═══════════ WIZARD ENGINE ═══════════ */
+function startWizard(product){
+  wizProduct=product; wizStep=0; wizAnswers={};
+  showPage('wizard'); renderWizStep();
+}
+function renderWizStep(){
+  const steps=WIZARDS[wizProduct];
+  const step=steps[wizStep];
+  const total=steps.length;
+  document.getElementById('wiz-progress').style.width=((wizStep)/total*100)+'%';
+  setTimeout(()=>{document.getElementById('wiz-progress').style.width=((wizStep+0.5)/total*100)+'%';},50);
+  document.getElementById('wiz-step-label').textContent='Step '+(wizStep+1)+' of '+total+' — '+PRODUCT_META[wizProduct].label;
+  document.getElementById('wiz-pct').textContent=Math.round((wizStep+0.5)/total*100)+'%';
+  const card=document.getElementById('wiz-card');
+  let html='<div class="wiz-q">'+PRODUCT_META[wizProduct].icon+' '+step.q+'</div>';
+  if(step.hint) html+='<p class="wiz-hint">'+step.hint+'</p>';
+  if(step.type==='options'){
+    const cols=step.opts.length===3?' three':'';
+    html+='<div class="opt-grid'+cols+'">';
+    step.opts.forEach((o,i)=>{
+      const sel=wizAnswers[step.key]===o.label?' selected':'';
+      html+=`<div class="opt-card${sel}" onclick="pickOption('${step.key}','${o.label.replace(/'/g,"\\'")}')">
+        <div class="opt-icon">${o.icon}</div><div class="opt-label">${o.label}</div><div class="opt-sub">${o.sub}</div></div>`;
+    });
+    html+='</div>';
+    html+='<div class="wiz-nav">';
+    if(wizStep>0) html+='<button class="btn-wiz-prev" onclick="wizPrev()">← Back</button>';
+    html+='</div>';
+  } else {
+    step.fields.forEach(f=>{
+      html+='<div class="wiz-field"><label>'+f.label+'</label>';
+      if(f.type==='select'){
+        html+='<select id="wf-'+f.key+'">'+f.opts.map(o=>'<option>'+o+'</option>').join('')+'</select>';
+      } else {
+        html+='<input type="'+(f.type||'text')+'" id="wf-'+f.key+'" placeholder="'+(f.ph||'')+'">';
+      }
+      html+='</div>';
+    });
+    html+='<div class="wiz-nav">';
+    if(wizStep>0) html+='<button class="btn-wiz-prev" onclick="wizPrev()">← Back</button>';
+    const isLast=wizStep===total-1;
+    html+='<button class="btn-wiz-next" onclick="wizNext()">'+(isLast?'🔍 Find My Quotes':'Continue →')+'</button>';
+    html+='</div>';
+  }
+  card.innerHTML=html;
+}
+function pickOption(key,val){
+  wizAnswers[key]=val;
+  document.querySelectorAll('.opt-card').forEach(c=>{
+    if(c.querySelector('.opt-label').textContent===val)c.classList.add('selected');
+  });
+  setTimeout(()=>wizNext(),240);
+}
+function wizNext(){
+  const steps=WIZARDS[wizProduct];
+  const step=steps[wizStep];
+  if(step.type==='fields'){
+    step.fields.forEach(f=>{
+      const el=document.getElementById('wf-'+f.key);
+      if(el) wizAnswers[f.key]=el.value;
+    });
+  }
+  if(wizStep<steps.length-1){wizStep++;renderWizStep();}
+  else runAggregator();
+}
+function wizPrev(){if(wizStep>0){wizStep--;renderWizStep();}}
+function wizardBack(){
+  if(wizStep>0){wizStep--;renderWizStep();}
+  else showPage('home');
+}
+
+/* ═══════════ AGGREGATOR ═══════════ */
+function runAggregator(){
+  showPage('search');
+  const deals=CATALOG[wizProduct]||[];
+  const involved=[...new Set(deals.map(d=>d.ins))];
+  const list=document.getElementById('agg-list');
+  list.innerHTML=involved.map((idx,i)=>{
+    const I=INSURERS[idx];
+    return `<div class="agg-row" id="agg-${i}">
+      <div class="agg-row-left"><div class="agg-logo" style="background:${I.color}">${I.code}</div><span class="agg-name">${I.name}</span></div>
+      <span class="agg-status searching" id="aggs-${i}">Waiting…</span></div>`;
+  }).join('');
+  let done=0;
+  involved.forEach((idx,i)=>{
+    setTimeout(()=>{
+      document.getElementById('agg-'+i).classList.add('active');
+      document.getElementById('aggs-'+i).innerHTML='<span class="spinner"></span>Fetching quote…';
+    }, 400+i*600);
+    setTimeout(()=>{
+      const row=document.getElementById('agg-'+i);
+      row.classList.remove('active');row.classList.add('done');
+      const count=deals.filter(d=>d.ins===idx).length;
+      const st=document.getElementById('aggs-'+i);
+      st.innerHTML='✓ '+count+' quote'+(count>1?'s':'')+' found';
+      st.className='agg-status found';
+      done++;
+      document.getElementById('agg-sub').textContent=done+' of '+involved.length+' insurers responded…';
+      if(done===involved.length){setTimeout(()=>showResults(),700);}
+    }, 1200+i*600+Math.random()*500);
+  });
+}
+
+/* ═══════════ RESULTS ═══════════ */
+function showResults(){
+  currentDeals=[...(CATALOG[wizProduct]||[])];
+  sortMode='price';featFilters=[];insurerFilter=null;
+  document.getElementById('f-price').value=15000;
+  document.getElementById('f-price-lbl').textContent='MUR 15,000';
+  document.querySelectorAll('.f-chip').forEach(c=>c.classList.remove('on'));
+  document.querySelectorAll('.sort-chip').forEach((c,i)=>c.classList.toggle('on',i===0));
+  document.getElementById('res-title').textContent=PRODUCT_META[wizProduct].icon+' Your '+PRODUCT_META[wizProduct].label+' Quotes';
+  const cheapest=Math.min(...currentDeals.map(d=>d.price));
+  const dearest=Math.max(...currentDeals.map(d=>d.price));
+  document.getElementById('res-sub').textContent=currentDeals.length+' live quotes · You could save up to MUR '+((dearest-cheapest)*12).toLocaleString()+'/yr by comparing';
+  const chips=[];
+  Object.entries(wizAnswers).forEach(([k,v])=>{if(v&&chips.length<3&&k!=='name'&&k!=='phone')chips.push(v);});
+  document.getElementById('res-chips').innerHTML=chips.map(c=>'<span class="rh-chip">'+c+'</span>').join('')+'<span class="rh-chip"><button onclick="startWizard(wizProduct)">✏️ Edit details</button></span>';
+  const insSet=[...new Set(currentDeals.map(d=>d.ins))];
+  document.getElementById('f-insurers').innerHTML='<span class="f-chip on" onclick="setInsFilter(this,null)">All</span>'+insSet.map(i=>'<span class="f-chip" onclick="setInsFilter(this,'+i+')">'+INSURERS[i].code+'</span>').join('');
+  renderDeals();
+  showPage('results');
+}
+function renderDeals(){
+  const maxP=parseInt(document.getElementById('f-price').value)||15000;
+  let deals=currentDeals.filter(d=>d.price<=maxP);
+  if(insurerFilter!==null)deals=deals.filter(d=>d.ins===insurerFilter);
+  featFilters.forEach(f=>{deals=deals.filter(d=>d.feats.some(x=>x.toLowerCase().includes(f.toLowerCase())));});
+  if(sortMode==='price')deals.sort((a,b)=>a.price-b.price);
+  else if(sortMode==='rating')deals.sort((a,b)=>b.rating-a.rating);
+  else if(sortMode==='score')deals.sort((a,b)=>b.score-a.score);
+  else deals.sort((a,b)=>(b.rating*1000-b.price*0.1)-(a.rating*1000-a.price*0.1));
+  const avg=currentDeals.reduce((s,d)=>s+d.price,0)/currentDeals.length;
+  document.getElementById('res-count').innerHTML='<b>'+deals.length+'</b> plans match your criteria';
+  const inCmp=compareList.map(x=>x.id);
+  document.getElementById('deals-list').innerHTML=deals.map(d=>{
+    const I=INSURERS[d.ins];
+    const saving=Math.round((avg-d.price)*12);
+    return `<div class="deal-card ${d.best?'best':''}">
+      ${d.best?'<span class="best-ribbon">🏆 RECOMMENDED</span>':d.cheapest?'<span class="cheapest-ribbon">💰 CHEAPEST</span>':''}
+      <div class="dc-logo" style="background:${I.color}">${I.code}</div>
+      <div>
+        <div class="dc-name">${d.name}</div>
+        <div class="dc-insurer">${I.name} · ${d.cover}</div>
+        <div class="dc-meta-row">
+          <span class="dc-rating">★ ${d.rating} / 5</span>
+          <span class="cov-ring">🛡️ Coverage ${d.score}/100</span>
+        </div>
+        <div class="dc-features">${d.feats.slice(0,4).map(f=>'<span class="dc-feat">✓ '+f+'</span>').join('')}${d.feats.length>4?'<span class="dc-feat neutral">+'+(d.feats.length-4)+' more</span>':''}</div>
+      </div>
+      <div class="dc-price-zone">
+        ${saving>0?'<span class="dc-save">Save MUR '+saving.toLocaleString()+'/yr vs avg</span>':'<span style="display:block;height:22px;"></span>'}
+        <div class="dc-price">MUR ${d.price.toLocaleString()}</div>
+        <span class="dc-per">per month</span>
+        <div class="dc-annual">MUR ${(d.price*12).toLocaleString()} / year</div>
+        <button class="btn-deal" onclick="openPlan('${d.id}')">🚀 Get This Deal</button>
+        <button class="btn-deal-cmp ${inCmp.includes(d.id)?'added':''}" onclick="toggleCmp('${d.id}')">${inCmp.includes(d.id)?'✓ Added':'+ Compare'}</button>
+        <button class="btn-wa-quote" onclick="showToast('💬 Quote for ${d.name.replace(/'/g,"\\'")} sent to your WhatsApp')">📲 Send to WhatsApp</button>
+      </div>
+    </div>`;
+  }).join('')||'<div style="text-align:center;padding:3rem;color:var(--muted);">No plans match — try relaxing your filters.<br><button class="btn-cmp-clear" style="margin-top:12px;" onclick="resetFilters()">Reset filters</button></div>';
+}
+function setSort(el,mode){document.querySelectorAll('.sort-chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');sortMode=mode;renderDeals();}
+function setInsFilter(el,i){document.querySelectorAll('#f-insurers .f-chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');insurerFilter=i;renderDeals();}
+function toggleFeatFilter(el,f){el.classList.toggle('on');const i=featFilters.indexOf(f);if(i>-1)featFilters.splice(i,1);else featFilters.push(f);renderDeals();}
+function resetFilters(){featFilters=[];insurerFilter=null;document.getElementById('f-price').value=15000;document.getElementById('f-price-lbl').textContent='MUR 15,000';document.querySelectorAll('.f-chip').forEach((c,i)=>c.classList.toggle('on',c.textContent==='All'));renderDeals();}
+
+/* ═══════════ PLAN MODAL / COMPARE ═══════════ */
+function findDeal(id){return Object.values(CATALOG).flat().find(d=>d.id===id);}
+function openPlan(id){
+  const d=findDeal(id);if(!d)return;selectedDeal=d;
+  const I=INSURERS[d.ins];
+  document.getElementById('pm-name').textContent=d.name;
+  document.getElementById('pm-sub').textContent=I.name+' · '+d.cover+' · ★ '+d.rating+' · 🛡️ '+d.score+'/100';
+  document.getElementById('pm-price').textContent='MUR '+d.price.toLocaleString();
+  document.getElementById('pm-save').textContent='MUR '+(d.price*12).toLocaleString()+' / year';
+  document.getElementById('pm-features').innerHTML=d.feats.map(f=>'<div class="feat-li">'+f+'</div>').join('');
+  document.getElementById('pm-details').textContent=d.desc+' Underwritten by '+I.name+', a fully licensed insurer in Mauritius. 14-day cooling-off period applies.';
+  document.getElementById('plan-ov').classList.add('on');
+}
+function toggleCmp(id){
+  const d=findDeal(id);if(!d)return;
+  const i=compareList.findIndex(x=>x.id===id);
+  if(i>-1){compareList.splice(i,1);showToast(d.name+' removed');}
+  else{if(compareList.length>=3){showToast('Max 3 plans in comparison');return;}compareList.push(d);showToast('✓ '+d.name+' added to compare');}
+  updateCmpBar();renderDeals();
+}
+function updateCmpBar(){
+  const bar=document.getElementById('cmp-bar');
+  if(!compareList.length){bar.classList.remove('on');return;}
+  bar.classList.add('on');
+  document.getElementById('cmp-go').disabled=compareList.length<2;
+  let html='';
+  for(let i=0;i<3;i++){
+    if(compareList[i]){html+=`<div class="cmp-slot filled"><div><div class="sn">${compareList[i].name}</div><div class="sp">MUR ${compareList[i].price.toLocaleString()}/mo</div></div><button class="cmp-x" onclick="toggleCmp('${compareList[i].id}')">✕</button></div>`;}
+    else html+='<div class="cmp-slot"><span style="font-size:11px;color:var(--muted);">+ Add plan</span></div>';
+  }
+  document.getElementById('cmp-slots').innerHTML=html;
+}
+function clearCompare(){compareList=[];updateCmpBar();renderDeals();}
+function openCompare(){
+  if(compareList.length<2)return;
+  document.getElementById('cm-sub').textContent='Comparing '+compareList.length+' plans side by side';
+  const allFeats=[...new Set(compareList.flatMap(d=>d.feats))];
+  let html='<table class="cmp-table"><thead><tr><th>Feature</th>'+compareList.map(d=>'<th style="background:'+INSURERS[d.ins].color+';color:#fff;border-radius:8px 8px 0 0;">'+d.name+'<br><small style="font-weight:400;opacity:.8">'+INSURERS[d.ins].name+'</small></th>').join('')+'</tr></thead><tbody>';
+  html+='<tr><td class="lbl">Monthly price</td>'+compareList.map(d=>'<td><b style="font-size:16px;">MUR '+d.price.toLocaleString()+'</b></td>').join('')+'</tr>';
+  html+='<tr><td class="lbl">Annual price</td>'+compareList.map(d=>'<td>MUR '+(d.price*12).toLocaleString()+'</td>').join('')+'</tr>';
+  html+='<tr><td class="lbl">Cover</td>'+compareList.map(d=>'<td>'+d.cover+'</td>').join('')+'</tr>';
+  html+='<tr><td class="lbl">Rating</td>'+compareList.map(d=>'<td>★ '+d.rating+'</td>').join('')+'</tr>';
+  html+='<tr><td class="lbl">Coverage score</td>'+compareList.map(d=>'<td><b style="color:var(--teal);">'+d.score+'/100</b></td>').join('')+'</tr>';
+  allFeats.forEach(f=>{
+    html+='<tr><td class="lbl">'+f+'</td>'+compareList.map(d=>'<td>'+(d.feats.includes(f)?'<span class="yes">✓ Yes</span>':'<span class="no">— No</span>')+'</td>').join('')+'</tr>';
+  });
+  html+='<tr><td></td>'+compareList.map(d=>'<td><button class="btn-deal" style="font-size:12.5px;padding:10px;" onclick="document.getElementById(\'cmp-ov\').classList.remove(\'on\');openPlan(\''+d.id+'\')">🚀 Get Deal</button></td>').join('')+'</tr>';
+  html+='</tbody></table>';
+  document.getElementById('cm-table').innerHTML=html;
+  document.getElementById('cmp-ov').classList.add('on');
+}
+
+/* ═══════════ CHECKOUT ═══════════ */
+function goCheckout(){
+  document.getElementById('plan-ov').classList.remove('on');
+  if(!selectedDeal)return;
+  const I=INSURERS[selectedDeal.ins];
+  document.getElementById('co-summary').innerHTML=`
+    <div class="dc-logo" style="width:48px;height:48px;background:${I.color};font-size:9.5px;">${I.code}</div>
+    <div style="flex:1;"><div style="font-size:14.5px;font-weight:800;">${selectedDeal.name}</div>
+    <div style="font-size:12px;color:var(--muted);">${I.name} · ${selectedDeal.cover}</div></div>
+    <div style="text-align:right;"><div style="font-size:19px;font-weight:700;font-family:'Space Grotesk',sans-serif;">MUR ${selectedDeal.price.toLocaleString()}</div><div style="font-size:11px;color:var(--muted);">/ month</div></div>`;
+  showPage('checkout');
+}
+function selPay(el){document.querySelectorAll('.pay-opt').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');}
+function confettiBurst(){
+  const emo=['🎉','🎊','🪙','🦤','✨'];
+  for(let i=0;i<26;i++){
+    const c=document.createElement('div');c.className='confetti';
+    c.textContent=emo[i%emo.length];
+    c.style.left=Math.random()*100+'vw';
+    c.style.animationDuration=(2.2+Math.random()*1.8)+'s';
+    c.style.fontSize=(14+Math.random()*14)+'px';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4200);
+  }
+}
+function completePurchase(){
+  if(!selectedDeal)return;
+  const I=INSURERS[selectedDeal.ins];
+  const num='OI-2026-'+Math.floor(100000+Math.random()*900000);
+  const renew=new Date();renew.setFullYear(renew.getFullYear()+1);
+  userPolicies.push({id:num,name:selectedDeal.name,ins:I,price:selectedDeal.price,renews:renew.toLocaleDateString('en-GB',{month:'short',year:'numeric'})});
+  dodoPoints+=250;
+  document.getElementById('success-summary').innerHTML=`
+    <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--muted);">Policy number</span><b>${num}</b></div>
+    <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--muted);">Plan</span><b>${selectedDeal.name}</b></div>
+    <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--muted);">Insurer</span><b>${I.name}</b></div>
+    <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--muted);">Premium</span><b>MUR ${selectedDeal.price.toLocaleString()}/mo</b></div>
+    <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:13.5px;"><span style="color:var(--muted);">Status</span><b style="color:var(--green);">✓ Active</b></div>`;
+  showPage('success');
+  confettiBurst();
+}
+
+/* ═══════════ DASHBOARD ═══════════ */
+function renderDashboard(){
+  if(!userPolicies.some(p=>p.demo)){
+    const d=new Date();d.setDate(d.getDate()+11);
+    userPolicies.unshift({id:'OI-2026-004411',name:'HomeSafe All Perils',ins:INSURERS[0],price:1800,renews:d.toLocaleDateString('en-GB',{month:'short',year:'numeric'}),demo:true,daysLeft:11});
+  }
+  document.getElementById('d-count').textContent=userPolicies.length;
+  document.getElementById('d-premium').textContent='MUR '+userPolicies.reduce((s,p)=>s+p.price,0).toLocaleString();
+  document.getElementById('d-points').textContent=dodoPoints.toLocaleString();
+  document.getElementById('d-policies').innerHTML=userPolicies.map(p=>`
+    <div class="pol-row">
+      <div class="dc-logo" style="width:44px;height:44px;background:${p.ins.color};font-size:9px;">${p.ins.code}</div>
+      <div style="flex:1;min-width:150px;"><div style="font-size:13.5px;font-weight:800;">${p.name}</div>
+      <div style="font-size:11.5px;color:var(--muted);">${p.id} · Renews ${p.renews}</div></div>
+      <span style="background:rgba(6,214,160,0.12);color:var(--green);font-size:10.5px;font-weight:800;padding:4px 11px;border-radius:20px;">✓ Active</span>
+      <b style="font-size:13.5px;white-space:nowrap;">MUR ${p.price.toLocaleString()}/mo</b>
+    </div>`).join('');
+  const expiring=userPolicies.filter(p=>p.daysLeft&&p.daysLeft<=30);
+  document.getElementById('renewal-alerts').innerHTML=expiring.length?`
+    <div class="remind-band">
+      <div class="remind-head"><span style="font-size:18px;">🔔</span><div><b style="font-size:14px;">Renewal Reminder</b><div style="font-size:11.5px;opacity:.85;">${expiring.length} policy expiring within 30 days — renew now to avoid a coverage gap</div></div></div>
+      <div class="remind-body">${expiring.map(p=>`
+        <div class="remind-item">
+          <div class="dc-logo" style="width:40px;height:40px;background:${p.ins.color};font-size:8.5px;">${p.ins.code}</div>
+          <div style="flex:1;min-width:130px;"><b style="font-size:13px;">${p.name}</b><div style="font-size:11px;color:var(--muted);">${p.id}</div></div>
+          <span style="background:rgba(255,107,94,0.12);color:var(--coral);font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;">⏰ ${p.daysLeft} days left</span>
+          <button class="btn-deal" style="width:auto;margin:0;padding:9px 18px;font-size:12.5px;" onclick="startWizard('home')">🔄 Re-compare &amp; Renew</button>
+        </div>`).join('')}
+        <p style="font-size:11px;color:var(--coral);margin:4px;">💡 We automatically re-compare the whole market at renewal — you always get the best current price.</p>
+      </div>
+    </div>`:'';
+}
+
+/* ═══════════ CLAIMS ═══════════ */
+let claimType=null, claimPolicy=null;
+const userClaims=[
+  {ref:'CLM-2026-118203',policy:'HomeSafe All Perils',ins:INSURERS[0],type:'Cyclone / Weather',amount:48500,date:'14 Feb 2026',status:2,desc:'Roof damage — Cyclone season'},
+];
+const CLAIM_STAGES=['Submitted','Under Review','Approved','Paid'];
+
+function claimTab(tab){
+  document.getElementById('cl-file').style.display=tab==='file'?'block':'none';
+  document.getElementById('cl-track').style.display=tab==='track'?'block':'none';
+  const f=document.getElementById('cl-tab-file'),t=document.getElementById('cl-tab-track');
+  f.style.background=tab==='file'?'var(--deep)':'transparent';f.style.color=tab==='file'?'#fff':'var(--muted)';
+  t.style.background=tab==='track'?'var(--deep)':'transparent';t.style.color=tab==='track'?'#fff':'var(--muted)';
+  if(tab==='track')renderClaims();
+  if(tab==='file')renderClaimPolicies();
+}
+function renderClaimPolicies(){
+  if(!userPolicies.length){
+    const d=new Date();d.setDate(d.getDate()+11);
+    userPolicies.push({id:'OI-2026-004411',name:'HomeSafe All Perils',ins:INSURERS[0],price:1800,renews:d.toLocaleDateString('en-GB',{month:'short',year:'numeric'}),demo:true,daysLeft:11});
+  }
+  document.getElementById('cl-policy-list').innerHTML=userPolicies.map((p,i)=>`
+    <div class="pol-row" id="clp-${i}" onclick="pickClaimPolicy(${i})" style="cursor:pointer;border:2px solid ${claimPolicy===i?'var(--teal)':'transparent'};">
+      <div class="dc-logo" style="width:42px;height:42px;background:${p.ins.color};font-size:8.5px;">${p.ins.code}</div>
+      <div style="flex:1;"><b style="font-size:13.5px;">${p.name}</b><div style="font-size:11.5px;color:var(--muted);">${p.id}</div></div>
+      ${claimPolicy===i?'<span style="color:var(--teal);font-weight:800;font-size:13px;">✓ Selected</span>':''}
+    </div>`).join('');
+}
+function pickClaimPolicy(i){claimPolicy=i;renderClaimPolicies();}
+function pickClaimType(el,type){
+  claimType=type;
+  el.parentElement.querySelectorAll('.opt-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function submitClaim(){
+  if(claimPolicy===null){showToast('⚠️ Please select a policy first');return;}
+  if(!claimType){showToast('⚠️ Please select what happened');return;}
+  const p=userPolicies[claimPolicy];
+  const ref='CLM-2026-'+Math.floor(100000+Math.random()*900000);
+  const amt=parseInt(document.getElementById('cl-amount').value)||0;
+  const desc=document.getElementById('cl-desc').value||claimType;
+  userClaims.unshift({ref,policy:p.name,ins:p.ins,type:claimType,amount:amt,date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),status:0,desc});
+  claimType=null;claimPolicy=null;
+  showToast('✅ Claim '+ref+' submitted! Advisor will call within 24h');
+  claimTab('track');
+}
+function renderClaims(){
+  const list=document.getElementById('cl-track-list');
+  if(!userClaims.length){
+    list.innerHTML='<div class="co-card" style="text-align:center;color:var(--muted);">No claims yet. If something happens, we\'re here — file a claim any time.</div>';
+    return;
+  }
+  list.innerHTML=userClaims.map(c=>{
+    const pct=(c.status/(CLAIM_STAGES.length-1))*100;
+    return `<div class="co-card">
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem;">
+        <div class="dc-logo" style="width:46px;height:46px;background:${c.ins.color};font-size:9px;">${c.ins.code}</div>
+        <div style="flex:1;min-width:160px;">
+          <b style="font-size:15px;">${c.type}</b>
+          <div style="font-size:12px;color:var(--muted);">${c.ref} · ${c.policy} · ${c.date}</div>
+        </div>
+        <span style="background:${c.status===3?'rgba(6,214,160,0.12)':c.status===2?'rgba(14,149,148,0.12)':'rgba(255,193,69,0.16)'};color:${c.status===3?'var(--green)':c.status===2?'var(--teal)':'#A16E00'};font-size:11px;font-weight:800;padding:5px 14px;border-radius:20px;">${CLAIM_STAGES[c.status]}</span>
+        ${c.amount?'<b style="font-size:14px;">MUR '+c.amount.toLocaleString()+'</b>':''}
+      </div>
+      <div style="position:relative;height:6px;background:var(--border);border-radius:10px;margin-bottom:0.8rem;">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:10px;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        ${CLAIM_STAGES.map((s,i)=>`<span style="font-size:11px;font-weight:${i<=c.status?'800':'500'};color:${i<=c.status?'var(--ink)':'var(--muted)'};">${i<c.status?'✓ ':''}${s}</span>`).join('')}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1.1rem;flex-wrap:wrap;">
+        <button class="btn-cmp-clear" onclick="showToast('💬 Claims advisor on WhatsApp: +230 5XXX XXXX')">💬 Chat with advisor</button>
+        <button class="btn-cmp-clear" onclick="showToast('📎 Additional documents uploaded')">📎 Add documents</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════ i18n ═══════════ */
+const LANG={
+  en:{
+    nav_motor:'Motor',nav_health:'Health',nav_life:'Life',nav_travel:'Travel',nav_home:'Home',nav_claims:'Claims',nav_quote:'Get My Quote',
+    hero_badge:"🇲🇺 Mauritius's smartest insurance comparison · 100% free",
+    hero_h1:'One island. Every insurer. <em>Your best price.</em>',
+    hero_sub:'We scan <b style="color:#fff">15+ Mauritian insurers</b> in real time — motor, health, life, travel, home &amp; business — and rank every plan side by side. Cyclone cover clearly flagged. Pay with Juice, Blink or MyT Money.',
+    hero_cta1:'🚀 Compare Now — Free',hero_cta2:'🎓 Test Your Insurance IQ',
+    hc_title:'Ki ou anvi asire zordi?',hc_sub:'What do you want to insure today? Quotes from every insurer in 60 seconds.',
+    lm_eyebrow:'Life moments',lm_title:'Insurance that follows your life',lm_sub:"Big moment coming up? We'll tell you exactly what cover you need — nothing more.",
+    hiw_title:'How it works',hiw_sub:'Three steps. Sixty seconds. Serious savings.',
+    prod_title:'Every type of cover, one platform',prod_sub:'Click any product to compare quotes instantly',
+    calc_title:'How much are you overpaying?',calc_btn:'Show me real quotes →',
+    cta_title:'Ready to stop overpaying?',cta_sub:'Join 52,000+ Mauritians who compare before they buy. Takes 60 seconds.',cta_btn:'🚀 Get My Free Quote Now',
+    cyc_cta:'Check my cover →',dodo_fab:'Ask Dodo',
+    quiz_title:"🎓 What's your Insurance IQ?",quiz_btn:'Take the 1-minute quiz →',
+    cl_title:'📋 Claims Centre',cl_sub:'File a new claim or track an existing one — most claims processed in 5–10 days',
+    cl_tab_file:'📝 File a Claim',cl_tab_track:'🔎 Track My Claims',
+    cl_f1:'1. Which policy is this claim for?',cl_f2:'2. What happened?',cl_f3:'3. Claim details',cl_submit:'📤 Submit My Claim',
+  },
+  fr:{
+    nav_motor:'Auto',nav_health:'Santé',nav_life:'Vie',nav_travel:'Voyage',nav_home:'Habitation',nav_claims:'Sinistres',nav_quote:'Obtenir mon devis',
+    hero_badge:'🇲🇺 Le comparateur d\'assurances le plus malin de Maurice · 100% gratuit',
+    hero_h1:'Une île. Tous les assureurs. <em>Votre meilleur prix.</em>',
+    hero_sub:'Nous interrogeons <b style="color:#fff">15+ assureurs mauriciens</b> en temps réel et classons chaque plan côte à côte. Couverture cyclone clairement indiquée. Payez avec Juice, Blink ou MyT Money.',
+    hero_cta1:'🚀 Comparer — Gratuit',hero_cta2:'🎓 Testez votre QI Assurance',
+    hc_title:'Que voulez-vous assurer aujourd\'hui ?',hc_sub:'Devis de tous les assureurs en 60 secondes.',
+    lm_eyebrow:'Moments de vie',lm_title:'Une assurance qui suit votre vie',lm_sub:'Un grand moment approche ? On vous dit exactement quelle couverture il vous faut.',
+    hiw_title:'Comment ça marche',hiw_sub:'Trois étapes. Soixante secondes. De vraies économies.',
+    prod_title:'Tous les types de couverture, une seule plateforme',prod_sub:'Cliquez sur un produit pour comparer instantanément',
+    calc_title:'Combien payez-vous en trop ?',calc_btn:'Voir de vrais devis →',
+    cta_title:'Prêt à ne plus payer trop cher ?',cta_sub:'Rejoignez 52 000+ Mauriciens qui comparent avant d\'acheter.',cta_btn:'🚀 Obtenir mon devis gratuit',
+    cyc_cta:'Vérifier ma couverture →',dodo_fab:'Demander à Dodo',
+    quiz_title:'🎓 Quel est votre QI Assurance ?',quiz_btn:'Faire le quiz d\'1 minute →',
+    cl_title:'📋 Centre de Sinistres',cl_sub:'Déclarez un nouveau sinistre ou suivez un dossier — traitement en 5 à 10 jours',
+    cl_tab_file:'📝 Déclarer un sinistre',cl_tab_track:'🔎 Suivre mes sinistres',
+    cl_f1:'1. Quelle police concerne ce sinistre ?',cl_f2:'2. Que s\'est-il passé ?',cl_f3:'3. Détails du sinistre',cl_submit:'📤 Soumettre mon sinistre',
+  },
+  kr:{
+    nav_motor:'Loto',nav_health:'Lasante',nav_life:'Lavi',nav_travel:'Vwayaz',nav_home:'Lakaz',nav_claims:'Reklamasion',nav_quote:'Gagn mo devi',
+    hero_badge:'🇲🇺 Platform konparezon lasirans pli malin dan Moris · 100% gratis',
+    hero_h1:'Enn zil. Tou lasirans. <em>Ou meyer pri.</em>',
+    hero_sub:'Nou rod pri kot <b style="color:#fff">15+ konpagni lasirans morisien</b> an tan reel ek nou montre ou tou bann pri kot-a-kot. Kouvertir siklonn bien marke. Pey ek Juice, Blink ouswa MyT Money.',
+    hero_cta1:'🚀 Konpar aster — Gratis',hero_cta2:'🎓 Teste ou IQ Lasirans',
+    hc_title:'Ki ou anvi asire zordi ?',hc_sub:'Devi tou konpagni dan 60 segonn.',
+    lm_eyebrow:'Moman lavi',lm_title:'Lasirans ki swiv ou lavi',lm_sub:'Enn gran moman pe vini ? Nou dir ou exakteman ki kouvertir ou bizin.',
+    hiw_title:'Kouma li marse',hiw_sub:'Trwa letap. Swasant segonn. Gro lekonomi.',
+    prod_title:'Tou kalite kouvertir, enn sel platform',prod_sub:'Klik lor ninport ki prodwi pou konpar deswit',
+    calc_title:'Komie ou pe pey an tro ?',calc_btn:'Montre mwa bann vre devi →',
+    cta_title:'Ou pare pou aret pey tro ser ?',cta_sub:'Zwenn 52,000+ Morisien ki konpar avan zot aste.',cta_btn:'🚀 Gagn mo devi gratis aster-la',
+    cyc_cta:'Get mo kouvertir →',dodo_fab:'Demann Dodo',
+    quiz_title:'🎓 Ki ou IQ Lasirans ?',quiz_btn:'Fer quiz 1 minit-la →',
+    cl_title:'📋 Sant Reklamasion',cl_sub:'Fer enn nouvo reklamasion ouswa swiv enn dosie — trete dan 5–10 zour',
+    cl_tab_file:'📝 Fer enn reklamasion',cl_tab_track:'🔎 Swiv mo reklamasion',
+    cl_f1:'1. Pou ki polis sa reklamasion-la ?',cl_f2:'2. Ki finn arive ?',cl_f3:'3. Detay reklamasion',cl_submit:'📤 Avoy mo reklamasion',
+  },
+};
+function setLang(code){
+  const dict=LANG[code]||LANG.en;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(dict[k]!==undefined)el.innerHTML=dict[k];
+  });
+  const h1=document.getElementById('hero-h1');if(h1&&dict.hero_h1)h1.innerHTML=dict.hero_h1;
+  const hs=document.getElementById('hero-sub');if(hs&&dict.hero_sub)hs.innerHTML=dict.hero_sub;
+  showToast(code==='fr'?'🇫🇷 Langue : Français':code==='kr'?'🇲🇺 Lang : Kreol Morisien':'🇬🇧 Language: English');
+}
+
+/* ═══════════ CORE ═══════════ */
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  window.scrollTo(0,0);
+  if(name==='account')renderDashboard();
+  document.getElementById('cmp-bar').classList.toggle('on',name==='results'&&compareList.length>0);
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2800);
+}
+/* init */
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+document.querySelectorAll('.hero-proof [data-count]').forEach(el=>io.observe(el.closest('.hero-proof')||el));
+io.observe(document.querySelector('.hero-inner'));
+calcUpdate();
+pickDist('pl');
+</script>
+</body>
+</html>

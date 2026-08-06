@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneInsurance — Broker Admin</title>
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#FBFAF7;--card:#fff;--ink:#1D2926;--muted:#5D6A64;--border:#E5E1D8;--teal:#1D4E48;--teal2:#2A6159;--deep:#152F2B;--coral:#9C4732;--gold:#8A6D3B;--green:#2E7D5B;}
+body{background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;}
+h1,h2,h3{font-family:'Source Serif 4',serif;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:0 max(1.5rem,calc((100% - 1180px)/2));height:62px;display:flex;align-items:center;gap:1rem;}
+header h1{font-size:20px;}
+header .sub{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+header .right{margin-left:auto;display:flex;gap:10px;align-items:center;}
+.who{font-size:12.5px;color:var(--muted);}
+main{max-width:1180px;margin:0 auto;padding:1.6rem 1.5rem 4rem;}
+.btn{background:var(--teal);color:#fff;border:none;padding:9px 16px;border-radius:3px;font-size:13px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;}
+.btn:hover{background:var(--teal2);}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border);}
+.btn.small{padding:6px 12px;font-size:12px;}
+.btn.danger{background:var(--coral);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+/* login */
+#login{max-width:400px;margin:5rem auto;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:2.2rem;}
+#login h2{font-size:22px;margin-bottom:4px;}
+#login p{font-size:13px;color:var(--muted);margin-bottom:1.4rem;}
+.field{margin-bottom:1rem;}
+.field label{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.field input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:3px;font-size:14px;font-family:'IBM Plex Sans',sans-serif;outline:none;background:var(--card);color:var(--ink);}
+.field input:focus{border-color:var(--teal);}
+.err{color:var(--coral);font-size:12.5px;margin-top:10px;min-height:16px;}
+/* tabs */
+.tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:1.4rem;background:var(--card);width:fit-content;}
+.tab{padding:11px 22px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:'IBM Plex Sans',sans-serif;border-right:1px solid var(--border);}
+.tab:last-child{border-right:none;}
+.tab.on{background:var(--deep);color:#fff;}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.4rem;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.1rem 1.2rem;}
+.stat b{font-family:'IBM Plex Mono',monospace;font-size:24px;display:block;font-weight:600;}
+.stat span{font-size:11.5px;color:var(--muted);font-weight:600;}
+/* tables */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.panel h3{font-size:16px;padding:1rem 1.2rem;border-bottom:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg);}
+td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+td .mono{font-size:12px;}
+.stb{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:3px;white-space:nowrap;}
+.stb.act,.stb.paid{background:rgba(62,142,108,0.12);color:var(--green);}
+.stb.pend{background:rgba(217,164,65,0.16);color:#8A6420;}
+.stb.rej{background:rgba(156,71,50,0.12);color:var(--coral);}
+.empty{padding:2rem;text-align:center;color:var(--muted);font-size:13px;}
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--deep);color:#fff;padding:11px 22px;border-radius:3px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;}
+#toast.show{opacity:1;}
+.note{font-size:12px;color:var(--muted);line-height:1.6;padding:0.9rem 1.2rem;border-top:1px solid var(--border);background:var(--bg);}
+@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr);}table{font-size:12px;}td,th{padding:8px;}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<header>
+  <div><h1>OneInsurance</h1><span class="sub">Broker Admin</span></div>
+  <div class="right" id="head-right"></div>
+</header>
+
+<!-- LOGIN -->
+<div id="login">
+  <h2>Broker sign in</h2>
+  <p>Restricted area. Admin accounts only — all access is logged.</p>
+  <div class="field"><label>Email</label><input id="l-email" type="email" autocomplete="username"></div>
+  <div class="field"><label>Password</label><input id="l-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+  <button class="btn" style="width:100%;" id="l-btn" onclick="doLogin()">Sign in</button>
+  <div class="err" id="l-err"></div>
+</div>
+
+<!-- APP -->
+<main id="app" style="display:none;">
+  <div class="stats" id="stats"></div>
+  <div class="tabs">
+    <button class="tab on" id="t-orders" onclick="showTab('orders')">Payments</button>
+    <button class="tab" id="t-policies" onclick="showTab('policies')">Policies</button>
+    <button class="tab" id="t-claims" onclick="showTab('claims')">Claims</button>
+    <button class="tab" id="t-users" onclick="showTab('users')">Customers</button>
+  </div>
+  <div class="panel" id="panel"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL='https://suxhfgwffnpnxjfbdqzc.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1eGhmZ3dmZm5wbnhqZmJkcXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwNzU4OTcsImV4cCI6MjEwMDY1MTg5N30.wdENaAL_arNzsk6y_Vkk2jLUuQd2UZZDVzXuwKo_4lg';
+let sb=null;
+try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }
+catch(e){ console.warn('Supabase library failed to load:',e); }
+let me=null, tab='orders', D={orders:[],policies:[],claims:[],profiles:[]};
+const CLAIM_STAGES=['Submitted','Under Review','Approved','Paid'];
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600);}
+
+async function doLogin(){
+  const err=document.getElementById('l-err');err.textContent='';
+  if(!sb){err.textContent='Connection to the database could not be established — check your internet connection and reload.';return;}
+  const btn=document.getElementById('l-btn');btn.disabled=true;btn.textContent='Checking…';
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email:document.getElementById('l-email').value.trim(),password:document.getElementById('l-pass').value});
+    if(error)throw error;
+    await enter(data.user);
+  }catch(e){err.textContent=e.message||'Sign in failed';}
+  finally{btn.disabled=false;btn.textContent='Sign in';}
+}
+async function enter(user){
+  const {data:prof,error}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
+  if(error||!prof||!prof.is_admin){
+    await sb.auth.signOut();
+    document.getElementById('l-err').textContent='This account does not have admin access.';
+    return;
+  }
+  me=user;
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('head-right').innerHTML='<span class="who">'+(prof.name||user.email)+' · admin</span><button class="btn ghost small" onclick="doLogout()">Sign out</button>';
+  await refresh();
+}
+async function doLogout(){await sb.auth.signOut();location.reload();}
+
+async function refresh(){
+  const [o,p,c,u]=await Promise.all([
+    sb.from('orders').select('*').order('created_at',{ascending:false}),
+    sb.from('policies').select('*').order('created_at',{ascending:false}),
+    sb.from('claims').select('*').order('created_at',{ascending:false}),
+    sb.from('profiles').select('*').order('created_at',{ascending:false}),
+  ]);
+  D.orders=o.data||[];D.policies=p.data||[];D.claims=c.data||[];D.profiles=u.data||[];
+  renderStats();renderTab();
+}
+function fmtDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';}
+function userOf(id){const p=D.profiles.find(x=>x.id===id);return p?(p.name||id.slice(0,8)):id?id.slice(0,8)+'…':'—';}
+
+function renderStats(){
+  const pendingPay=D.orders.filter(o=>o.status==='pending').length;
+  const mrr=D.policies.filter(p=>p.status!=='pending').reduce((s,p)=>s+(p.price||0),0);
+  const openClaims=D.claims.filter(c=>(c.status||0)<3).length;
+  document.getElementById('stats').innerHTML=
+    '<div class="stat"><b>'+pendingPay+'</b><span>Payments awaiting confirmation</span></div>'+
+    '<div class="stat"><b>'+D.policies.length+'</b><span>Policies ('+D.policies.filter(p=>p.status!=='pending').length+' active)</span></div>'+
+    '<div class="stat"><b>'+openClaims+'</b><span>Open claims</span></div>'+
+    '<div class="stat"><b>'+D.profiles.length+'</b><span>Registered customers</span></div>';
+}
+function showTab(t){tab=t;document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));document.getElementById('t-'+t).classList.add('on');renderTab();}
+
+function renderTab(){
+  const P=document.getElementById('panel');
+  if(tab==='orders'){
+    P.innerHTML='<h3>Payments</h3>'+(D.orders.length?'<table><tr><th>Reference</th><th>Customer</th><th>Plan</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th><th></th></tr>'+
+      D.orders.map(o=>'<tr><td class="mono">'+o.reference+'</td><td>'+userOf(o.user_id)+'</td><td>'+(o.plan_name||'—')+'</td><td class="mono">MUR '+(o.amount||0).toLocaleString()+'</td><td>'+(o.method||'—')+'</td><td>'+fmtDate(o.created_at)+'</td>'+
+      '<td><span class="stb '+(o.status==='paid'?'paid':o.status==='rejected'?'rej':'pend')+'">'+o.status+'</span></td>'+
+      '<td style="white-space:nowrap;">'+(o.status==='pending'?'<button class="btn small" onclick="confirmPay(\''+o.id+'\')">Confirm payment</button> <button class="btn small ghost" onclick="rejectPay(\''+o.id+'\')">Reject</button>':'')+'</td></tr>').join('')+'</table>':'<div class="empty">No payments yet.</div>')+
+      '<div class="note">Confirming a payment marks the order as paid and activates the linked policy — the customer sees it turn Active immediately.</div>';
+  }
+  if(tab==='policies'){
+    P.innerHTML='<h3>Policies</h3>'+(D.policies.length?'<table><tr><th>Policy N°</th><th>Customer</th><th>Plan</th><th>Insurer</th><th>Premium</th><th>Type</th><th>Renews</th><th>Status</th><th></th></tr>'+
+      D.policies.map(p=>'<tr><td class="mono">'+p.id+'</td><td>'+userOf(p.user_id)+'</td><td>'+p.name+'</td><td>'+(p.insurer||'—')+'</td><td class="mono">MUR '+(p.price||0).toLocaleString()+'/mo</td><td>'+(p.type||'—')+'</td><td>'+(p.renews||'—')+'</td>'+
+      '<td><span class="stb '+(p.status==='pending'?'pend':'act')+'">'+(p.status||'active')+'</span></td>'+
+      '<td>'+(p.status==='pending'?'<button class="btn small" onclick="activatePolicy(\''+p.id+'\')">Activate</button>':'')+'</td></tr>').join('')+'</table>':'<div class="empty">No policies yet.</div>');
+  }
+  if(tab==='claims'){
+    P.innerHTML='<h3>Claims</h3>'+(D.claims.length?'<table><tr><th>Reference</th><th>Customer</th><th>Policy</th><th>Type</th><th>Amount</th><th>Date</th><th>Stage</th><th></th></tr>'+
+      D.claims.map(c=>{const st=c.status||0;return '<tr><td class="mono">'+c.ref+'</td><td>'+userOf(c.user_id)+'</td><td>'+(c.policy||'—')+'</td><td>'+(c.type||'—')+'</td><td class="mono">'+(c.amount?'MUR '+c.amount.toLocaleString():'—')+'</td><td>'+fmtDate(c.created_at)+'</td>'+
+      '<td><span class="stb '+(st===3?'paid':st===0?'pend':'act')+'">'+CLAIM_STAGES[st]+'</span></td>'+
+      '<td>'+(st<3?'<button class="btn small" onclick="advanceClaim(\''+c.ref+'\','+st+')">Move to '+CLAIM_STAGES[st+1]+'</button>':'')+'</td></tr>';}).join('')+'</table>':'<div class="empty">No claims yet.</div>');
+  }
+  if(tab==='users'){
+    P.innerHTML='<h3>Customers</h3>'+(D.profiles.length?'<table><tr><th>Name</th><th>Joined</th><th>Policies</th><th>Claims</th><th>Points</th><th>Role</th></tr>'+
+      D.profiles.map(u=>'<tr><td>'+(u.name||'—')+'</td><td>'+fmtDate(u.created_at)+'</td><td class="mono">'+D.policies.filter(p=>p.user_id===u.id).length+'</td><td class="mono">'+D.claims.filter(c=>c.user_id===u.id).length+'</td><td class="mono">'+(u.points||0)+'</td><td>'+(u.is_admin?'<span class="stb act">admin</span>':'customer')+'</td></tr>').join('')+'</table>':'<div class="empty">No customers yet.</div>');
+  }
+}
+
+async function confirmPay(id){
+  const o=D.orders.find(x=>x.id===id);if(!o)return;
+  const r1=await sb.from('orders').update({status:'paid'}).eq('id',id);
+  if(r1.error){toast('Error: '+r1.error.message);return;}
+  if(o.policy_id){
+    const r2=await sb.from('policies').update({status:'active'}).eq('id',o.policy_id);
+    if(r2.error){toast('Order paid, but policy update failed: '+r2.error.message);await refresh();return;}
+  }
+  toast('Payment '+o.reference+' confirmed — policy activated');
+  await refresh();
+}
+async function rejectPay(id){
+  const r=await sb.from('orders').update({status:'rejected'}).eq('id',id);
+  toast(r.error?('Error: '+r.error.message):'Payment marked as rejected');
+  await refresh();
+}
+async function activatePolicy(id){
+  const r=await sb.from('policies').update({status:'active'}).eq('id',id);
+  toast(r.error?('Error: '+r.error.message):'Policy '+id+' activated');
+  await refresh();
+}
+async function advanceClaim(ref,st){
+  const r=await sb.from('claims').update({status:st+1}).eq('ref',ref);
+  toast(r.error?('Error: '+r.error.message):'Claim '+ref+' → '+CLAIM_STAGES[st+1]);
+  await refresh();
+}
+
+/* restore session */
+(async()=>{
+  if(!sb)return;
+  try{const {data}=await sb.auth.getSession();if(data&&data.session)await enter(data.session.user);}catch(e){}
+})();
+</script>
+</body>
+</html>

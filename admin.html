@@ -176,8 +176,14 @@ function renderTab(){
       '<td>'+(st<3?'<button class="btn small" onclick="advanceClaim(\''+c.ref+'\','+st+')">Move to '+CLAIM_STAGES[st+1]+'</button>':'')+'</td></tr>';}).join('')+'</table>':'<div class="empty">No claims yet.</div>');
   }
   if(tab==='users'){
-    P.innerHTML='<h3>Customers</h3>'+(D.profiles.length?'<table><tr><th>Name</th><th>Joined</th><th>Policies</th><th>Claims</th><th>Points</th><th>Role</th></tr>'+
-      D.profiles.map(u=>'<tr><td>'+(u.name||'—')+'</td><td>'+fmtDate(u.created_at)+'</td><td class="mono">'+D.policies.filter(p=>p.user_id===u.id).length+'</td><td class="mono">'+D.claims.filter(c=>c.user_id===u.id).length+'</td><td class="mono">'+(u.points||0)+'</td><td>'+(u.is_admin?'<span class="stb act">admin</span>':'customer')+'</td></tr>').join('')+'</table>':'<div class="empty">No customers yet.</div>');
+    P.innerHTML='<h3>Customers &amp; team</h3>'+(D.profiles.length?'<table><tr><th>Name</th><th>Email</th><th>Joined</th><th>Policies</th><th>Claims</th><th>Points</th><th>Role</th><th></th></tr>'+
+      D.profiles.map(u=>'<tr><td>'+(u.name||'—')+'</td><td class="mono" style="font-size:11.5px;">'+(u.email||'—')+'</td><td>'+fmtDate(u.created_at)+'</td><td class="mono">'+D.policies.filter(p=>p.user_id===u.id).length+'</td><td class="mono">'+D.claims.filter(c=>c.user_id===u.id).length+'</td><td class="mono">'+(u.points||0)+'</td><td>'+(u.is_admin?'<span class="stb act">admin</span>':'customer')+'</td>'+
+      '<td style="white-space:nowrap;">'+
+        (u.id===me.id?'<span style="font-size:11px;color:var(--muted);">you</span>':
+          (u.is_admin?'<button class="btn small ghost" onclick="setAdmin(\''+u.id+'\',false)">Revoke admin</button>':'<button class="btn small ghost" onclick="setAdmin(\''+u.id+'\',true)">Make admin</button>')+
+          (u.email?' <button class="btn small ghost" onclick="sendReset(\''+u.email+'\')">Send password reset</button>':''))+
+      '</td></tr>').join('')+'</table>':'<div class="empty">No customers yet.</div>')+
+      '<div class="note">Make admin gives that account full access to this panel — grant it only to people you trust. Send password reset emails the user a secure link to choose a new password; nobody ever sees or types anyone else\'s password.</div>';
   }
 }
 
@@ -201,6 +207,19 @@ async function activatePolicy(id){
   const r=await sb.from('policies').update({status:'active'}).eq('id',id);
   toast(r.error?('Error: '+r.error.message):'Policy '+id+' activated');
   await refresh();
+}
+async function setAdmin(id,flag){
+  if(flag && !confirm('Give this account full admin access to policies, payments and customer data?'))return;
+  const r=await sb.from('profiles').update({is_admin:flag}).eq('id',id);
+  toast(r.error?('Error: '+r.error.message):(flag?'Admin access granted':'Admin access revoked'));
+  await refresh();
+}
+async function sendReset(email){
+  try{
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://ritvik01-netizen.github.io/oneinsurance/'});
+    if(error)throw error;
+    toast('Password reset email sent to '+email);
+  }catch(e){toast('Error: '+(e.message||'could not send'));}
 }
 async function advanceClaim(ref,st){
   const r=await sb.from('claims').update({status:st+1}).eq('ref',ref);

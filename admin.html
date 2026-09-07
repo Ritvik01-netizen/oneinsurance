@@ -99,52 +99,76 @@ td .mono{font-size:12px;}
   <div class="panel" id="panel"></div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
-const SB_URL='https://suxhfgwffnpnxjfbdqzc.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1eGhmZ3dmZm5wbnhqZmJkcXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwNzU4OTcsImV4cCI6MjEwMDY1MTg5N30.wdENaAL_arNzsk6y_Vkk2jLUuQd2UZZDVzXuwKo_4lg';
-let sb=null;
-try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }
-catch(e){ console.warn('Supabase library failed to load:',e); }
+/* Paste the same Firebase web config used in index.html below, then redeploy. */
+const firebaseConfig={
+  apiKey:"AIzaSyBvssVWzBFwkImHDgTWKmOuZ_MV0AarZMA",
+  authDomain:"oneinsurance-mu.firebaseapp.com",
+  projectId:"oneinsurance-mu",
+  storageBucket:"oneinsurance-mu.firebasestorage.app",
+  messagingSenderId:"824652888791",
+  appId:"1:824652888791:web:61465653af1c6bb5e28e92"
+};
+let auth=null, db=null;
+try{
+  if(firebaseConfig.apiKey!=='YOUR_API_KEY' && window.firebase){
+    firebase.initializeApp(firebaseConfig);
+    auth=firebase.auth();
+    db=firebase.firestore();
+  }
+}catch(e){ console.warn('Firebase init failed:',e); }
 let me=null, tab='orders', D={orders:[],policies:[],claims:[],profiles:[]};
+function tsMillis(ts){ if(!ts)return 0; if(ts.toMillis)return ts.toMillis(); if(ts.seconds)return ts.seconds*1000; return 0; }
+function tsIso(ts){ const m=tsMillis(ts); return m?new Date(m).toISOString():''; }
+function sortAndStamp(rows){
+  rows.sort((a,b)=>tsMillis(b.created_at)-tsMillis(a.created_at));
+  rows.forEach(r=>{ r.created_at=tsIso(r.created_at); });
+  return rows;
+}
 const CLAIM_STAGES=['Submitted','Under Review','Approved','Paid'];
 
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600);}
 
 async function doLogin(){
   const err=document.getElementById('l-err');err.textContent='';
-  if(!sb){err.textContent='Connection to the database could not be established — check your internet connection and reload.';return;}
+  if(!auth||!db){err.textContent='Connection to the database could not be established — check your internet connection and reload.';return;}
   const btn=document.getElementById('l-btn');btn.disabled=true;btn.textContent='Checking…';
   try{
-    const {data,error}=await sb.auth.signInWithPassword({email:document.getElementById('l-email').value.trim(),password:document.getElementById('l-pass').value});
-    if(error)throw error;
-    await enter(data.user);
+    const cred=await auth.signInWithEmailAndPassword(document.getElementById('l-email').value.trim(),document.getElementById('l-pass').value);
+    await enter(cred.user);
   }catch(e){err.textContent=e.message||'Sign in failed';}
   finally{btn.disabled=false;btn.textContent='Sign in';}
 }
 async function enter(user){
-  const {data:prof,error}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
-  if(error||!prof||!prof.is_admin){
-    await sb.auth.signOut();
+  const snap=await db.collection('profiles').doc(user.uid).get();
+  const prof=snap.exists?snap.data():null;
+  if(!prof||!prof.is_admin){
+    await auth.signOut();
     document.getElementById('l-err').textContent='This account does not have admin access.';
     return;
   }
-  me=user;
+  me={uid:user.uid,id:user.uid,email:user.email};
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('head-right').innerHTML='<span class="who">'+(prof.name||user.email)+' · admin</span><button class="btn ghost small" onclick="doLogout()">Sign out</button>';
   await refresh();
 }
-async function doLogout(){await sb.auth.signOut();location.reload();}
+async function doLogout(){await auth.signOut();location.reload();}
 
 async function refresh(){
   const [o,p,c,u]=await Promise.all([
-    sb.from('orders').select('*').order('created_at',{ascending:false}),
-    sb.from('policies').select('*').order('created_at',{ascending:false}),
-    sb.from('claims').select('*').order('created_at',{ascending:false}),
-    sb.from('profiles').select('*').order('created_at',{ascending:false}),
+    db.collection('orders').get(),
+    db.collection('policies').get(),
+    db.collection('claims').get(),
+    db.collection('profiles').get(),
   ]);
-  D.orders=o.data||[];D.policies=p.data||[];D.claims=c.data||[];D.profiles=u.data||[];
+  D.orders=sortAndStamp(o.docs.map(d=>({id:d.id,...d.data()})));
+  D.policies=sortAndStamp(p.docs.map(d=>({id:d.id,...d.data()})));
+  D.claims=sortAndStamp(c.docs.map(d=>({ref:d.id,...d.data()})));
+  D.profiles=sortAndStamp(u.docs.map(d=>({id:d.id,...d.data()})));
   renderStats();renderTab();
 }
 function fmtDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';}
@@ -197,23 +221,24 @@ function renderTab(){
 
 async function confirmPay(id){
   const o=D.orders.find(x=>x.id===id);if(!o)return;
-  const r1=await sb.from('orders').update({status:'paid'}).eq('id',id);
-  if(r1.error){toast('Error: '+r1.error.message);return;}
-  if(o.policy_id){
-    const r2=await sb.from('policies').update({status:'active'}).eq('id',o.policy_id);
-    if(r2.error){toast('Order paid, but policy update failed: '+r2.error.message);await refresh();return;}
-  }
-  toast('Payment '+o.reference+' confirmed — policy activated');
+  try{
+    await db.collection('orders').doc(id).update({status:'paid'});
+    if(o.policy_id){
+      try{ await db.collection('policies').doc(o.policy_id).update({status:'active'}); }
+      catch(e2){ toast('Order paid, but policy update failed: '+e2.message); await refresh(); return; }
+    }
+    toast('Payment '+o.reference+' confirmed — policy activated');
+  }catch(e){toast('Error: '+e.message);}
   await refresh();
 }
 async function rejectPay(id){
-  const r=await sb.from('orders').update({status:'rejected'}).eq('id',id);
-  toast(r.error?('Error: '+r.error.message):'Payment marked as rejected');
+  try{ await db.collection('orders').doc(id).update({status:'rejected'}); toast('Payment marked as rejected'); }
+  catch(e){ toast('Error: '+e.message); }
   await refresh();
 }
 async function activatePolicy(id){
-  const r=await sb.from('policies').update({status:'active'}).eq('id',id);
-  toast(r.error?('Error: '+r.error.message):'Policy '+id+' activated');
+  try{ await db.collection('policies').doc(id).update({status:'active'}); toast('Policy '+id+' activated'); }
+  catch(e){ toast('Error: '+e.message); }
   await refresh();
 }
 function matchQ(x){const el=document.getElementById('q');const q=el?el.value.trim().toLowerCase():'';if(!q)return true;return JSON.stringify(x).toLowerCase().includes(q);}
@@ -232,46 +257,46 @@ function exportCSV(){
 }
 async function delPolicy(id){
   if(!confirm('Permanently delete policy '+id+'? The customer will no longer see it. This cannot be undone.'))return;
-  const r=await sb.from('policies').delete().eq('id',id);
-  toast(r.error?('Error: '+r.error.message):'Policy '+id+' deleted');
+  try{ await db.collection('policies').doc(id).delete(); toast('Policy '+id+' deleted'); }
+  catch(e){ toast('Error: '+e.message); }
   await refresh();
 }
 async function delOrder(id){
   if(!confirm('Permanently delete payment record '+id+'? This cannot be undone.'))return;
-  const r=await sb.from('orders').delete().eq('id',id);
-  toast(r.error?('Error: '+r.error.message):'Payment record deleted');
+  try{ await db.collection('orders').doc(id).delete(); toast('Payment record deleted'); }
+  catch(e){ toast('Error: '+e.message); }
   await refresh();
 }
 async function delClaim(ref){
   if(!confirm('Permanently delete claim '+ref+'? This cannot be undone.'))return;
-  const r=await sb.from('claims').delete().eq('ref',ref);
-  toast(r.error?('Error: '+r.error.message):'Claim '+ref+' deleted');
+  try{ await db.collection('claims').doc(ref).delete(); toast('Claim '+ref+' deleted'); }
+  catch(e){ toast('Error: '+e.message); }
   await refresh();
 }
 async function setAdmin(id,flag){
   if(flag && !confirm('Give this account full admin access to policies, payments and customer data?'))return;
-  const r=await sb.from('profiles').update({is_admin:flag}).eq('id',id);
-  toast(r.error?('Error: '+r.error.message):(flag?'Admin access granted':'Admin access revoked'));
+  try{ await db.collection('profiles').doc(id).update({is_admin:flag}); toast(flag?'Admin access granted':'Admin access revoked'); }
+  catch(e){ toast('Error: '+e.message); }
   await refresh();
 }
 async function sendReset(email){
   try{
-    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://ritvik01-netizen.github.io/oneinsurance/'});
-    if(error)throw error;
+    await auth.sendPasswordResetEmail(email);
     toast('Password reset email sent to '+email);
   }catch(e){toast('Error: '+(e.message||'could not send'));}
 }
 async function advanceClaim(ref,st){
-  const r=await sb.from('claims').update({status:st+1}).eq('ref',ref);
-  toast(r.error?('Error: '+r.error.message):'Claim '+ref+' → '+CLAIM_STAGES[st+1]);
+  try{ await db.collection('claims').doc(ref).update({status:st+1}); toast('Claim '+ref+' → '+CLAIM_STAGES[st+1]); }
+  catch(e){ toast('Error: '+e.message); }
   await refresh();
 }
 
 /* restore session */
-(async()=>{
-  if(!sb)return;
-  try{const {data}=await sb.auth.getSession();if(data&&data.session)await enter(data.session.user);}catch(e){}
-})();
+if(auth){
+  auth.onAuthStateChanged(async function(user){
+    if(user)await enter(user);
+  });
+}
 </script>
 </body>
 </html>

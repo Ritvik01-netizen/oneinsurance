@@ -714,7 +714,9 @@ body.dark .stb.pend{color:var(--gold);}
 </div> <!-- quiz modal -->
 <div class="overlay" id="quiz-ov" onclick="if(event.target===this)this.classList.remove('on')"> <div class="modal"> <div class="modal-head"><div><h3><span class="ms">school</span> Insurance IQ Quiz</h3><p>5 questions · beat the island average of 2/5</p></div><button class="m-close" onclick="document.getElementById('quiz-ov').classList.remove('on')">✕</button></div> <div class="modal-body" id="quiz-body"></div> </div>
 </div> <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
 /* ═══════════ ACCESS GATE ═══════════ */
 const GATE_KEY='VGVzdDEyMw=='; /* access code (base64) */
@@ -731,12 +733,24 @@ function gateTry(){
 }
 try{if(sessionStorage.getItem('oi_gate')==='1')document.getElementById('gate').classList.add('off');}catch(e){}
 
-/* ═══════════ SUPABASE ACCOUNTS ═══════════ */
-/* Paste your Supabase project URL + anon public key below, then redeploy. */
-const SB_URL='https://suxhfgwffnpnxjfbdqzc.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1eGhmZ3dmZm5wbnhqZmJkcXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwNzU4OTcsImV4cCI6MjEwMDY1MTg5N30.wdENaAL_arNzsk6y_Vkk2jLUuQd2UZZDVzXuwKo_4lg';
-let sb=null, sbUser=null, sbProfile=null, authMode='in';
-try{ if(!SB_URL.startsWith('YOUR') && window.supabase){ sb=window.supabase.createClient(SB_URL,SB_KEY); } }catch(e){}
+/* ═══════════ FIREBASE ACCOUNTS ═══════════ */
+/* Paste your Firebase project's web config below, then redeploy. */
+const firebaseConfig={
+  apiKey:"AIzaSyBvssVWzBFwkImHDgTWKmOuZ_MV0AarZMA",
+  authDomain:"oneinsurance-mu.firebaseapp.com",
+  projectId:"oneinsurance-mu",
+  storageBucket:"oneinsurance-mu.firebasestorage.app",
+  messagingSenderId:"824652888791",
+  appId:"1:824652888791:web:61465653af1c6bb5e28e92"
+};
+let auth=null, db=null, sbUser=null, sbProfile=null, authMode='in', pendingOobCode=null;
+try{
+  if(firebaseConfig.apiKey!=='YOUR_API_KEY' && window.firebase){
+    firebase.initializeApp(firebaseConfig);
+    auth=firebase.auth();
+    db=firebase.firestore();
+  }
+}catch(e){ console.warn('Firebase init failed:',e); }
 
 function openAuth(){document.getElementById('auth-ov').classList.add('on');}
 function authTab(m){
@@ -748,116 +762,151 @@ function authTab(m){
   tu.style.background=m==='up'?'var(--deep)':'transparent';tu.style.color=m==='up'?'#fff':'var(--muted)';
   document.getElementById('auth-err').textContent='';
 }
+function friendlyAuthError(e){
+  const code=e&&e.code||'';
+  if(code==='auth/email-already-in-use')return 'An account already exists with that email — sign in instead, or use "Forgot password" if you don\'t remember your password.';
+  if(code==='auth/weak-password')return 'Please use a password of at least 6 characters.';
+  if(code==='auth/invalid-email')return 'That doesn\'t look like a valid email address.';
+  if(code==='auth/user-not-found'||code==='auth/wrong-password'||code==='auth/invalid-credential')return 'Wrong email or password — or you haven\'t created an account yet (use the "Create account" tab).';
+  if(code==='auth/too-many-requests')return 'Too many attempts — please wait a few minutes and try again.';
+  return (e&&e.message)||'Something went wrong';
+}
 async function authGo(){
   const email=document.getElementById('auth-email').value.trim();
   const pass=document.getElementById('auth-pass').value;
   const err=document.getElementById('auth-err');
   if(!email||!pass){err.textContent='Please fill in email and password';return;}
+  if(!auth){err.style.color='var(--coral)';err.textContent='Connection to the database unavailable — try again shortly.';return;}
   err.textContent='';document.getElementById('auth-go').textContent='⏳ Please wait…';
   try{
     if(authMode==='up'){
       const name=document.getElementById('auth-name').value.trim()||email.split('@')[0];
-      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
-      if(error)throw error;
-      if(data.user&&!data.session){
-        err.style.color='var(--green)';
-        err.innerHTML=' Account created!<br><span class="ms">mail</span> We\'ve sent a confirmation link to <b>'+email+'</b> — click it (check spam too), then come back and sign in.';
-        authTab('in');
-        document.getElementById('auth-err').style.color='var(--green)';
-        document.getElementById('auth-err').innerHTML=' Account created!<br><span class="ms">mail</span> Confirmation link sent to <b>'+email+'</b> — click it (check spam too), then sign in here.';
+      const cred=await auth.createUserWithEmailAndPassword(email,pass);
+      await cred.user.updateProfile({displayName:name});
+      await cred.user.sendEmailVerification();
+      await auth.signOut();
+      authTab('in');
+      err.style.color='var(--green)';
+      err.innerHTML=' Account created!<br><span class="ms">mail</span> We\'ve sent a confirmation link to <b>'+email+'</b> — click it (check spam too), then come back and sign in.';
+      return;
+    }else{
+      const cred=await auth.signInWithEmailAndPassword(email,pass);
+      if(!cred.user.emailVerified){
+        err.style.color='var(--coral)';
+        err.innerHTML='<span class="ms">mail</span> Your email isn\'t confirmed yet — click the link in the email we sent you (check spam!).<br><button onclick="resendConfirm()" style="margin-top:8px;background:none;border:1.5px solid var(--teal);color:var(--teal);border-radius:3px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:\'IBM Plex Sans\',sans-serif;">↻ Resend confirmation email</button>';
         return;
       }
-      sbUser=data.user;
-    }else{
-      const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
-      if(error)throw error;
-      sbUser=data.user;
+      sbUser=cred.user;
     }
     await loadUserData();
     document.getElementById('auth-ov').classList.remove('on');
     showToast('Bonzour '+(sbProfile&&sbProfile.name?sbProfile.name.split(' ')[0]:'')+'! Welcome to your account');
     showPage('account');
   }catch(e){
-    const msg=e.message||'Something went wrong';
     err.style.color='var(--coral)';
-    if(/not confirmed/i.test(msg)){
-      err.innerHTML='<span class="ms">mail</span> Your email isn\'t confirmed yet — click the link in the email we sent you (check spam!).<br><button onclick="resendConfirm()" style="margin-top:8px;background:none;border:1.5px solid var(--teal);color:var(--teal);border-radius:3px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:\'IBM Plex Sans\',sans-serif;">↻ Resend confirmation email</button>';
-    }else if(/invalid login credentials/i.test(msg)){
-      err.textContent=' Wrong email or password — or you haven\'t created an account yet (use the "Create account" tab).';
-    }else{err.textContent=' '+msg;}
+    err.textContent=' '+friendlyAuthError(e);
   }
   finally{document.getElementById('auth-go').textContent=authMode==='up'?'Create my account →':'Sign in →';}
 }
-async function resendConfirm(){
-  const email=document.getElementById('auth-email').value.trim();
-  if(!email){showToast(' Type your email above first');return;}
-  try{await sb.auth.resend({type:'signup',email});showToast('Confirmation email re-sent to '+email);}
-  catch(e){showToast(' '+(e.message||'Could not resend'));}
+function resendConfirm(){
+  if(!auth||!auth.currentUser){showToast(' Please sign in again first');return;}
+  auth.currentUser.sendEmailVerification()
+    .then(()=>showToast('Confirmation email re-sent'))
+    .catch(e=>showToast(' '+(e.message||'Could not resend')));
 }
 async function forgotPass(){
   const email=document.getElementById('auth-email').value.trim();
   const err=document.getElementById('auth-err');
-  if(!sb){err.style.color='var(--coral)';err.textContent='Connection to the database unavailable — try again shortly.';return;}
+  if(!auth){err.style.color='var(--coral)';err.textContent='Connection to the database unavailable — try again shortly.';return;}
   if(!email){err.style.color='var(--coral)';err.textContent='Type your email in the field above first, then click Forgot password.';return;}
   try{
-    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
-    if(error)throw error;
+    await auth.sendPasswordResetEmail(email);
     err.style.color='var(--green)';
     err.innerHTML='Reset link sent to <b>'+email+'</b>. Open it (check spam too) — it brings you back here to choose a new password.';
-  }catch(e){err.style.color='var(--coral)';err.textContent=e.message||'Could not send the reset email';}
+  }catch(e){err.style.color='var(--coral)';err.textContent=friendlyAuthError(e);}
 }
 async function doPasswordReset(){
   const p1=document.getElementById('rp-1').value,p2=document.getElementById('rp-2').value;
   const err=document.getElementById('rp-err');
   if(p1.length<8){err.textContent='Use at least 8 characters.';return;}
   if(p1!==p2){err.textContent='The two passwords do not match.';return;}
+  if(!auth||!pendingOobCode){err.textContent='This reset link is invalid or has expired — request a new one.';return;}
   const btn=document.getElementById('rp-btn');btn.disabled=true;btn.textContent='Saving…';
   try{
-    const {error}=await sb.auth.updateUser({password:p1});
-    if(error)throw error;
+    await auth.confirmPasswordReset(pendingOobCode,p1);
     document.getElementById('reset-ov').classList.remove('on');
-    showToast('Password updated — you are signed in');
-    const {data}=await sb.auth.getSession();
-    if(data&&data.session){sbUser=data.session.user;await loadUserData();}
-  }catch(e){err.textContent=e.message||'Could not update the password';}
+    pendingOobCode=null;
+    try{history.replaceState({},'',location.pathname);}catch(e){}
+    showToast('Password updated — please sign in with your new password');
+    openAuth();authTab('in');
+  }catch(e){err.textContent=friendlyAuthError(e)||'Could not update the password — the link may have expired, request a new one.';}
   finally{btn.disabled=false;btn.textContent='Save new password';}
 }
-if(sb){sb.auth.onAuthStateChange(function(event){ if(event==='PASSWORD_RECOVERY'){document.getElementById('reset-ov').classList.add('on');} });}
+function checkAuthActionLink(){
+  try{
+    const params=new URLSearchParams(location.search);
+    const mode=params.get('mode'),oobCode=params.get('oobCode');
+    if(mode==='resetPassword'&&oobCode&&auth){
+      auth.verifyPasswordResetCode(oobCode).then(function(){
+        pendingOobCode=oobCode;
+        document.getElementById('reset-ov').classList.add('on');
+      }).catch(function(){
+        showToast(' That reset link has expired — request a new one from the sign-in screen');
+        try{history.replaceState({},'',location.pathname);}catch(e){}
+      });
+    }else if(mode==='verifyEmail'&&oobCode&&auth){
+      auth.applyActionCode(oobCode).then(()=>showToast('Email confirmed — you can sign in now')).catch(()=>{});
+      try{history.replaceState({},'',location.pathname);}catch(e){}
+    }
+  }catch(e){}
+}
+checkAuthActionLink();
 async function sbSignOut(){
-  try{await sb.auth.signOut();}catch(e){}
+  try{if(auth)await auth.signOut();}catch(e){}
   sbUser=null;sbProfile=null;userPolicies.length=0;userClaims.length=0;dodoPoints=750;
   showToast(' Signed out — a revoir!');showPage('home');
 }
 async function loadUserData(){
-  if(!sb||!sbUser)return;
+  if(!db||!sbUser)return;
   try{
-    let {data:prof}=await sb.from('profiles').select('*').eq('id',sbUser.id).maybeSingle();
-    if(!prof){
-      const name=(sbUser.user_metadata&&sbUser.user_metadata.name)||sbUser.email.split('@')[0];
-      await sb.from('profiles').insert({id:sbUser.id,name,email:sbUser.email,points:500});
-      prof={id:sbUser.id,name,email:sbUser.email,points:500};
+    const profRef=db.collection('profiles').doc(sbUser.uid);
+    const profSnap=await profRef.get();
+    let prof;
+    if(!profSnap.exists){
+      const name=sbUser.displayName||sbUser.email.split('@')[0];
+      prof={name,email:sbUser.email,points:500,is_admin:false,created_at:firebase.firestore.FieldValue.serverTimestamp()};
+      await profRef.set(prof);
       showToast('+500 Dodo Points — welcome bonus!');
+    }else{
+      prof=profSnap.data();
     }
     sbProfile=prof;dodoPoints=prof.points||0;
-    const {data:pols}=await sb.from('policies').select('*').order('created_at',{ascending:false});
+    const polSnap=await db.collection('policies').where('user_id','==',sbUser.uid).get();
     userPolicies.length=0;
-    (pols||[]).forEach(r=>{
+    const polRows=polSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>tsMillis(b.created_at)-tsMillis(a.created_at));
+    polRows.forEach(r=>{
       const ins=INSURERS.find(i=>i.code===r.insurer)||INSURERS[0];
       userPolicies.push({id:r.id,name:r.name,ins,price:r.price,renews:r.renews,type:r.type,reg:r.reg,model:r.model,cover:r.cover,status:r.status||'active'});
     });
-    const {data:cls}=await sb.from('claims').select('*').order('created_at',{ascending:false});
+    const clSnap=await db.collection('claims').where('user_id','==',sbUser.uid).get();
     userClaims.length=0;
-    (cls||[]).forEach(r=>{
+    const clRows=clSnap.docs.map(d=>({ref:d.id,...d.data()})).sort((a,b)=>tsMillis(b.created_at)-tsMillis(a.created_at));
+    clRows.forEach(r=>{
       const ins=INSURERS.find(i=>i.code===r.insurer)||INSURERS[0];
-      userClaims.push({ref:r.ref,policy:r.policy,ins,type:r.type,amount:r.amount,date:new Date(r.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),status:r.status||0,desc:r.descr});
+      userClaims.push({ref:r.ref,policy:r.policy,ins,type:r.type,amount:r.amount,date:tsMillis(r.created_at)?new Date(tsMillis(r.created_at)).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—',status:r.status||0,desc:r.descr});
     });
   }catch(e){console.warn('loadUserData',e);}
 }
-async function sbRestoreSession(){
-  if(!sb)return;
-  try{const {data}=await sb.auth.getSession(); if(data&&data.session){sbUser=data.session.user;await loadUserData();}}catch(e){}
+function tsMillis(ts){ if(!ts)return 0; if(ts.toMillis)return ts.toMillis(); if(ts.seconds)return ts.seconds*1000; return 0; }
+if(auth){
+  auth.onAuthStateChanged(async function(user){
+    if(user&&user.emailVerified){
+      if(!sbUser||sbUser.uid!==user.uid){sbUser=user;await loadUserData();}
+    }else if(!user){
+      sbUser=null;
+    }
+  });
 }
-sbRestoreSession();
 
 /* ═══════════ DATA ═══════════ */
 const INSURERS = [
@@ -1394,10 +1443,11 @@ function completePurchase(){
   const renews=renew.toLocaleDateString('en-GB',{month:'short',year:'numeric'});
   userPolicies.push({id:num,name:selectedDeal.name,ins:I,price:selectedDeal.price,renews,type:wizProduct,reg:wizAnswers.reg||null,model:wizAnswers.model||null,cover:selectedDeal.cover,status:'pending'});
   dodoPoints+=250;
-  if(sb&&sbUser){
-    sb.from('policies').insert({id:num,user_id:sbUser.id,name:selectedDeal.name,insurer:I.code,price:selectedDeal.price,renews,type:wizProduct,reg:wizAnswers.reg||null,model:wizAnswers.model||null,cover:selectedDeal.cover,status:'pending'}).then(function(r){if(r&&r.error)console.warn('policy insert',r.error.message);});
-    sb.from('orders').insert({id:currentOrderRef,user_id:sbUser.id,policy_id:num,plan_name:selectedDeal.name,amount:selectedDeal.price,method:payMethod,reference:currentOrderRef,status:'pending'}).then(function(r){if(r&&r.error)console.warn('order insert',r.error.message);});
-    sb.from('profiles').update({points:dodoPoints}).eq('id',sbUser.id).then(function(){});
+  if(db&&sbUser){
+    const now=firebase.firestore.FieldValue.serverTimestamp();
+    db.collection('policies').doc(num).set({user_id:sbUser.uid,name:selectedDeal.name,insurer:I.code,price:selectedDeal.price,renews,type:wizProduct,reg:wizAnswers.reg||null,model:wizAnswers.model||null,cover:selectedDeal.cover,status:'pending',created_at:now}).catch(function(e){console.warn('policy insert',e.message);});
+    db.collection('orders').doc(currentOrderRef).set({user_id:sbUser.uid,policy_id:num,plan_name:selectedDeal.name,amount:selectedDeal.price,method:payMethod,reference:currentOrderRef,status:'pending',created_at:now}).catch(function(e){console.warn('order insert',e.message);});
+    db.collection('profiles').doc(sbUser.uid).update({points:dodoPoints}).catch(function(){});
   }
   const row=function(k,v){return '<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--muted);">'+k+'</span><b>'+v+'</b></div>';};
   document.getElementById('success-summary').innerHTML=
@@ -1513,7 +1563,7 @@ function submitClaim(){
   const amt=parseInt(document.getElementById('cl-amount').value)||0;
   const desc=document.getElementById('cl-desc').value||claimType;
   userClaims.unshift({ref,policy:p.name,ins:p.ins,type:claimType,amount:amt,date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),status:0,desc});
-  if(sb&&sbUser){sb.from('claims').insert({ref,user_id:sbUser.id,policy:p.name,insurer:p.ins.code,type:claimType,amount:amt,descr:desc,status:0}).then(()=>{});}
+  if(db&&sbUser){db.collection('claims').doc(ref).set({user_id:sbUser.uid,policy:p.name,insurer:p.ins.code,type:claimType,amount:amt,descr:desc,status:0,created_at:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});}
   claimType=null;claimPolicy=null;
   showToast(' Claim '+ref+' submitted! Advisor will call within 24h');
   claimTab('track');
@@ -1602,7 +1652,7 @@ function setLang(code){
 
 /* ═══════════ CORE ═══════════ */
 function showPage(name){
-  if(name==='account'&&sb&&!sbUser){openAuth();return;}
+  if(name==='account'&&auth&&!sbUser){openAuth();return;}
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   window.scrollTo(0,0);

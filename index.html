@@ -612,7 +612,7 @@ body.dark .stb.pend{color:var(--gold);}
 <body> <!-- ACCESS GATE -->
 <div id="gate"> <div class="gate-card"> <span class="g-emoji"><span class="ms">flutter_dash</span></span> <h2>Private Preview</h2> <p>OneInsurance is in invite-only preview.<br>Enter your access code to continue.</p> <input id="gate-in" type="password" placeholder="••••••••" autocomplete="off" onkeydown="if(event.key==='Enter')gateTry()"> <button onclick="gateTry()"><span class="ms">lock_open</span> Unlock</button> <div class="gate-err" id="gate-err"></div> <div class="gate-foot"> Authorised testers only · OneInsurance Mauritius</div> </div>
 </div> <div id="toast"></div>
-<button id="wa-float" onclick="showToast('WhatsApp support: +230 5XXX XXXX')" title="WhatsApp"><span class="ms">chat</span></button>
+<button id="wa-float" onclick="openCallback('General support')" title="Request a callback"><span class="ms">chat</span></button>
 <button id="dodo-fab" onclick="toggleDodo()"><span class="df-emoji"><span class="ms">flutter_dash</span></span><span data-i18n="dodo_fab">Quick Answers</span></button> <!-- DODO ASSISTANT -->
 <div id="dodo-panel"> <div class="dp-head"> <span class="dph-emoji"><span class="ms">flutter_dash</span></span> <div><h4>Dodo — Quick Answers</h4><p>EN · FR · Kreol Morisien</p></div> <button class="m-close" style="margin-left:auto;" onclick="toggleDodo()">✕</button> </div> <div class="dp-msgs" id="dp-msgs"></div> <div class="dp-sugg" id="dp-sugg"></div> <div class="dp-input"> <input id="dp-in" placeholder="Ask a quick question about insurance…" onkeydown="if(event.key==='Enter')dodoSend()"> <button onclick="dodoSend()"></button> </div>
 </div> <!-- CYCLONE TICKER -->
@@ -624,7 +624,7 @@ body.dark .stb.pend{color:var(--gold);}
 <p class="hero-sub" id="hero-sub">Answer a few questions about what you need covered and we request quotes from the insurers we are appointed with. You see the premium, the excess and what each policy leaves out — before you give us a signature.</p>
 <div class="hero-ctas">
 <button class="btn-hero" onclick="startWizard('motor')" data-i18n="hero_cta1">Start a motor quote</button>
-<button class="btn-hero-ghost" onclick="showToast('A broker will call you back within 2 hours')" data-i18n="hero_cta2">Speak to a broker · +230 5XX XXXX</button>
+<button class="btn-hero-ghost" onclick="openCallback('Homepage enquiry')" data-i18n="hero_cta2">Speak to a broker · +230 5XX XXXX</button>
 </div>
 <div class="honest">
 <div class="h-row"><span>What it costs you</span><p>Nothing. We are paid a commission by the insurer whose policy you choose, at the same rate across all of them.</p></div>
@@ -679,7 +679,26 @@ body.dark .stb.pend{color:var(--gold);}
 </div> <!-- compare bar -->
 <div id="cmp-bar"><div class="cmp-inner"> <span class="cmp-title">Compare</span> <div class="cmp-slots" id="cmp-slots"></div> <button class="btn-cmp-go" id="cmp-go" onclick="openCompare()" disabled>Compare Now →</button> <button class="btn-cmp-clear" onclick="clearCompare()">Clear</button>
 </div></div> <!-- plan modal -->
-<div class="overlay" id="plan-ov" onclick="if(event.target===this)this.classList.remove('on')"> <div class="modal"> <div class="modal-head"><div><h3 id="pm-name"></h3><p id="pm-sub"></p></div><button class="m-close" onclick="document.getElementById('plan-ov').classList.remove('on')">✕</button></div> <div class="modal-body"> <div class="price-hero"><div><div class="ph-amt" id="pm-price"></div><span class="ph-per">per month</span></div><span class="dc-save" id="pm-save"></span></div> <div class="m-sec"><h4>What's covered</h4><div id="pm-features"></div></div> <div class="m-sec"><h4>Key terms, explained</h4> <details style="font-size:13px;color:var(--muted);margin-bottom:6px;"><summary style="cursor:pointer;font-weight:600;color:var(--ink);">What's "excess"?</summary><p style="margin-top:6px;line-height:1.6;">The excess (deductible) is the first part of any claim you pay yourself — lower excess usually means higher premium.</p></details> <details style="font-size:13px;color:var(--muted);"><summary style="cursor:pointer;font-weight:600;color:var(--ink);">Does this cover cyclone damage?</summary><p style="margin-top:6px;line-height:1.6;">Third party cover only pays for damage you cause to others — your own cyclone damage needs comprehensive cover. Check "What's covered" above for this plan.</p></details> </div> <div class="m-sec"><h4>Details</h4><p style="font-size:13.5px;color:var(--muted);line-height:1.7;" id="pm-details"></p></div> <div class="m-actions"> <button class="btn-buy" onclick="goCheckout()">Buy This Plan →</button> <button class="btn-call" onclick="document.getElementById('plan-ov').classList.remove('on');showToast(' An advisor will call you within 2 hours')"> Call Me Back</button> </div> <div style="display:flex;justify-content:center;gap:1.2rem;margin-top:1rem;font-size:11px;color:var(--muted);"><span> Secure payment</span><span><span class="ms">description</span> Instant policy</span><span>↩ 14-day refund</span></div> </div> </div>
+<div class="overlay" id="plan-ov" onclick="if(event.target===this)this.classList.remove('on')"> <div class="modal"> <div class="modal-head"><div><h3 id="pm-name"></h3><p id="pm-sub"></p></div><button class="m-close" onclick="document.getElementById('plan-ov').classList.remove('on')">✕</button></div> <div class="modal-body"> <div class="price-hero"><div><div class="ph-amt" id="pm-price"></div><span class="ph-per">per month</span></div><span class="dc-save" id="pm-save"></span></div> <div class="m-sec"><h4>What's covered</h4><div id="pm-features"></div></div> <div class="m-sec"><h4>Key terms, explained</h4> <details style="font-size:13px;color:var(--muted);margin-bottom:6px;"><summary style="cursor:pointer;font-weight:600;color:var(--ink);">What's "excess"?</summary><p style="margin-top:6px;line-height:1.6;">The excess (deductible) is the first part of any claim you pay yourself — lower excess usually means higher premium.</p></details> <details style="font-size:13px;color:var(--muted);"><summary style="cursor:pointer;font-weight:600;color:var(--ink);">Does this cover cyclone damage?</summary><p style="margin-top:6px;line-height:1.6;">Third party cover only pays for damage you cause to others — your own cyclone damage needs comprehensive cover. Check "What's covered" above for this plan.</p></details> </div> <div class="m-sec"><h4>Details</h4><p style="font-size:13.5px;color:var(--muted);line-height:1.7;" id="pm-details"></p></div> <div class="m-actions"> <button class="btn-buy" onclick="goCheckout()">Buy This Plan →</button> <button class="btn-call" onclick="document.getElementById('plan-ov').classList.remove('on');openCallback(selectedDeal?selectedDeal.name:'a plan')"> Call Me Back</button> </div> <div style="display:flex;justify-content:center;gap:1.2rem;margin-top:1rem;font-size:11px;color:var(--muted);"><span> Secure payment</span><span><span class="ms">description</span> Instant policy</span><span>↩ 14-day refund</span></div> </div> </div>
+</div> <!-- callback request modal -->
+<div class="overlay" id="callback-ov" onclick="if(event.target===this)this.classList.remove('on')"> <div class="modal" style="max-width:420px;"> <div class="modal-head"><div><h3><span class="ms">call</span> Request a callback</h3><p id="cb-context-lbl">A broker will call you back</p></div><button class="m-close" onclick="document.getElementById('callback-ov').classList.remove('on')">✕</button></div> <div class="modal-body">
+<div id="cb-form">
+<div class="fgrid">
+<div class="ffield full"><label>Your name *</label><input type="text" id="cb-name" placeholder="Ravi Boodhoo"></div>
+<div class="ffield full"><label>Mobile number *</label><input type="tel" id="cb-phone" placeholder="+230 5XXX XXXX"></div>
+<div class="ffield full"><label>Best time to call</label><select id="cb-time"><option value="Anytime, working hours">Anytime, working hours</option><option value="Morning (9am–12pm)">Morning (9am–12pm)</option><option value="Afternoon (12pm–4pm)">Afternoon (12pm–4pm)</option><option value="Evening (4pm–6pm)">Evening (4pm–6pm)</option></select></div>
+</div>
+<div id="cb-form-error" style="display:none;background:rgba(156,71,50,0.08);border:1px solid rgba(156,71,50,0.3);color:var(--coral);border-radius:3px;padding:10px 13px;font-size:12.5px;margin-top:6px;"></div>
+<button class="btn-pay" id="cb-submit-btn" onclick="submitCallback()">Request callback →</button>
+<p style="text-align:center;font-size:11px;color:var(--muted);margin-top:10px;">A broker calls back within 2 working hours, Monday to Saturday.</p>
+</div>
+<div id="cb-success" style="display:none;text-align:center;padding:1rem 0;">
+<div style="width:60px;height:60px;background:rgba(62,142,108,0.14);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 1rem;color:var(--green);"><span class="ms">task_alt</span></div>
+<p style="font-size:14px;font-weight:700;margin-bottom:4px;">Request received — reference <span id="cb-ref"></span></p>
+<p style="font-size:12.5px;color:var(--muted);line-height:1.6;">A broker will call you back within 2 working hours, Monday to Saturday.</p>
+<button class="btn-cmp-clear" style="margin-top:14px;" onclick="document.getElementById('callback-ov').classList.remove('on')">Close</button>
+</div>
+</div> </div>
 </div> <!-- compare modal -->
 <div class="overlay" id="cmp-ov" onclick="if(event.target===this)this.classList.remove('on')"> <div class="modal wide"> <div class="modal-head"><div><h3>Side-by-side comparison</h3><p id="cm-sub"></p></div><button class="m-close" onclick="document.getElementById('cmp-ov').classList.remove('on')">✕</button></div> <div class="modal-body"><div style="overflow-x:auto;" id="cm-table"></div></div> </div>
 </div> <!-- cyclone modal -->
@@ -1233,7 +1252,7 @@ function dodoSend(){
   const hit=DODO_BRAIN.find(b=>b.k.some(k=>ql.includes(k)));
   // No artificial "typing" delay — this is an instant keyword lookup, not a live AI reply.
   if(hit){dodoSay(hit.r);if(hit.act==='cyclone')setTimeout(openCyclone,600);}
-  else dodoSay('<span class="ms">help</span> I don\'t have a canned answer for that one yet. Try asking about: excess, cyclone cover, NCB, third party vs comprehensive, claims, payments or Schengen visas. Or tap <span class="ms">chat</span> WhatsApp (bottom left) for a human advisor.');
+  else dodoSay('<span class="ms">help</span> I don\'t have a canned answer for that one yet. Try asking about: excess, cyclone cover, NCB, third party vs comprehensive, claims, payments or Schengen visas. Or tap <span class="ms">chat</span> (bottom left) to request a callback from a human advisor.');
 }
 
 /* ═══════════ WIZARD ENGINE ═══════════ */
@@ -1557,10 +1576,65 @@ async function completePurchase(){
     showPage('success');
   }catch(e){
     console.warn('completePurchase failed',e);
-    if(ceEl){ceEl.style.display='block';ceEl.textContent='We couldn\'t submit your application — nothing has been charged or saved. Please try again in a moment; if it keeps failing, message us on WhatsApp with a screenshot.';}
+    if(ceEl){ceEl.style.display='block';ceEl.textContent='We couldn\'t submit your application — nothing has been charged or saved. Please try again in a moment; if it keeps failing, tap the chat icon in the corner to request a callback.';}
   }finally{
     coSubmitting=false;
     if(btn){btn.disabled=false;btn.textContent=btnOldText||'I have sent the payment — submit application';}
+  }
+}
+
+/* ═══════════ CALLBACK REQUEST ═══════════ */
+let cbContext='General enquiry';
+function openCallback(context){
+  cbContext=context||'General enquiry';
+  const lbl=document.getElementById('cb-context-lbl');
+  if(lbl)lbl.textContent=context?('Re: '+context):'A broker will call you back';
+  const feEl=document.getElementById('cb-form-error');if(feEl)feEl.style.display='none';
+  document.getElementById('cb-form').style.display='block';
+  document.getElementById('cb-success').style.display='none';
+  const nameEl=document.getElementById('cb-name'), phoneEl=document.getElementById('cb-phone');
+  if(nameEl)nameEl.value=(sbProfile&&sbProfile.name)||'';
+  if(phoneEl)phoneEl.value=(sbProfile&&sbProfile.phone)||'';
+  document.getElementById('callback-ov').classList.add('on');
+}
+let cbSubmitting=false;
+async function submitCallback(){
+  if(cbSubmitting)return;
+  const name=(document.getElementById('cb-name').value||'').trim();
+  const phone=(document.getElementById('cb-phone').value||'').trim();
+  const bestTime=document.getElementById('cb-time').value;
+  const errEl=document.getElementById('cb-form-error');
+  errEl.style.display='none';
+  if(!name||!phone){
+    errEl.style.display='block';errEl.textContent='Please enter your name and mobile number so a broker can reach you.';
+    return;
+  }
+  if(!db||!auth){
+    errEl.style.display='block';errEl.textContent="We can't reach our database right now — please try again shortly, or call us directly.";
+    return;
+  }
+  cbSubmitting=true;
+  const btn=document.getElementById('cb-submit-btn');
+  const oldTxt=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Sending…';}
+  try{
+    const user=await ensureAuthed();
+    if(!user)throw new Error('Could not start a secure session');
+    const ref='CB-'+Math.floor(100000+Math.random()*900000);
+    await db.collection('callback_requests').doc(ref).set({
+      reference:ref,user_id:user.uid,is_guest:!!user.isAnonymous,
+      name,phone,best_time:bestTime,context:cbContext,
+      status:'new',created_at:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('cb-ref').textContent=ref;
+    document.getElementById('cb-form').style.display='none';
+    document.getElementById('cb-success').style.display='block';
+  }catch(e){
+    console.warn('submitCallback failed',e);
+    errEl.style.display='block';errEl.textContent="We couldn't send your request — please try again in a moment.";
+  }finally{
+    cbSubmitting=false;
+    if(btn){btn.disabled=false;btn.textContent=oldTxt||'Request callback →';}
   }
 }
 
@@ -1699,7 +1773,7 @@ function renderClaims(){
     const pct=(c.status/(CLAIM_STAGES.length-1))*100;
     return `<div class="co-card"> <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem;"> <div class="dc-logo" style="width:46px;height:46px;background:${c.ins.color};font-size:9px;">${c.ins.code}</div> <div style="flex:1;min-width:160px;"> <b style="font-size:15px;">${c.type}</b> <div style="font-size:12px;color:var(--muted);">${c.ref} · ${c.policy} · ${c.date}</div> </div> <span style="background:${c.status===3?'rgba(62,142,108,0.12)':c.status===2?'rgba(36,84,107,0.12)':'rgba(217,164,65,0.16)'};color:${c.status===3?'var(--green)':c.status===2?'var(--teal)':'#8A6420'};font-size:11px;font-weight:700;padding:5px 14px;border-radius:3px;">${CLAIM_STAGES[c.status]}</span> ${c.amount?'<b style="font-size:14px;">MUR '+c.amount.toLocaleString()+'</b>':''}
       </div> <div style="position:relative;height:6px;background:var(--border);border-radius:3px;margin-bottom:0.8rem;"> <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:3px;"></div> </div> <div style="display:flex;justify-content:space-between;"> ${CLAIM_STAGES.map((s,i)=>`<span style="font-size:11px;font-weight:${i<=c.status?'800':'500'};color:${i<=c.status?'var(--ink)':'var(--muted)'};">${i<c.status?'✓ ':''}${s}</span>`).join('')}
-      </div> <div style="display:flex;gap:10px;margin-top:1.1rem;flex-wrap:wrap;"> <button class="btn-cmp-clear" onclick="showToast('Claims advisor on WhatsApp: +230 5XXX XXXX')"><span class="ms">chat</span> Chat with advisor</button> <button class="btn-cmp-clear" onclick="showToast(' Additional documents uploaded')"> Add documents</button> </div> </div>`;
+      </div> <div style="display:flex;gap:10px;margin-top:1.1rem;flex-wrap:wrap;"> <button class="btn-cmp-clear" onclick="openCallback('Claim ${c.ref}')"><span class="ms">chat</span> Chat with advisor</button> <button class="btn-cmp-clear" onclick="showToast(' Additional documents uploaded')"> Add documents</button> </div> </div>`;
   }).join('');
 }
 

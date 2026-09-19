@@ -39,7 +39,7 @@ main{max-width:1180px;margin:0 auto;padding:1.6rem 1.5rem 4rem;}
 .tab:last-child{border-right:none;}
 .tab.on{background:var(--deep);color:#fff;}
 /* stats */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.4rem;}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:1.4rem;}
 .stat{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1.1rem 1.2rem;}
 .stat b{font-family:'IBM Plex Mono',monospace;font-size:24px;display:block;font-weight:600;}
 .stat span{font-size:11.5px;color:var(--muted);font-weight:600;}
@@ -63,6 +63,7 @@ td .mono{font-size:12px;}
 #toast.show{opacity:1;}
 .note{font-size:12px;color:var(--muted);line-height:1.6;padding:0.9rem 1.2rem;border-top:1px solid var(--border);background:var(--bg);}
 @media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr);}table{font-size:12px;}td,th{padding:8px;}}
+@media(min-width:801px) and (max-width:1080px){.stats{grid-template-columns:repeat(3,1fr);}}
 </style>
 </head>
 <body>
@@ -89,7 +90,8 @@ td .mono{font-size:12px;}
 <main id="app" style="display:none;">
   <div class="stats" id="stats"></div>
   <div class="tabs">
-    <button class="tab on" id="t-orders" onclick="showTab('orders')">Payments</button>
+    <button class="tab on" id="t-callbacks" onclick="showTab('callbacks')">Callbacks</button>
+    <button class="tab" id="t-orders" onclick="showTab('orders')">Payments</button>
     <button class="tab" id="t-policies" onclick="showTab('policies')">Policies</button>
     <button class="tab" id="t-claims" onclick="showTab('claims')">Claims</button>
     <button class="tab" id="t-users" onclick="showTab('users')">Customers</button>
@@ -123,7 +125,7 @@ try{
     db=firebase.firestore();
   }
 }catch(e){ console.warn('Firebase init failed:',e); }
-let me=null, tab='orders', D={orders:[],policies:[],claims:[],profiles:[]};
+let me=null, tab='callbacks', D={orders:[],policies:[],claims:[],profiles:[],callbacks:[]};
 function tsMillis(ts){ if(!ts)return 0; if(ts.toMillis)return ts.toMillis(); if(ts.seconds)return ts.seconds*1000; return 0; }
 function tsIso(ts){ const m=tsMillis(ts); return m?new Date(m).toISOString():''; }
 function sortAndStamp(rows){
@@ -175,16 +177,18 @@ async function enter(user){
 async function doLogout(){await auth.signOut();location.reload();}
 
 async function refresh(){
-  const [o,p,c,u]=await Promise.all([
+  const [o,p,c,u,cb]=await Promise.all([
     db.collection('orders').get(),
     db.collection('policies').get(),
     db.collection('claims').get(),
     db.collection('profiles').get(),
+    db.collection('callback_requests').get(),
   ]);
   D.orders=sortAndStamp(o.docs.map(d=>({id:d.id,...d.data()})));
   D.policies=sortAndStamp(p.docs.map(d=>({id:d.id,...d.data()})));
   D.claims=sortAndStamp(c.docs.map(d=>({ref:d.id,...d.data()})));
   D.profiles=sortAndStamp(u.docs.map(d=>({id:d.id,...d.data()})));
+  D.callbacks=sortAndStamp(cb.docs.map(d=>({id:d.id,...d.data()})));
   renderStats();renderTab();
 }
 function fmtDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';}
@@ -201,7 +205,9 @@ function renderStats(){
   const pendingPay=D.orders.filter(o=>o.status==='pending').length;
   const mrr=D.policies.filter(p=>p.status!=='pending').reduce((s,p)=>s+(p.price||0),0);
   const openClaims=D.claims.filter(c=>(c.status||0)<3).length;
+  const newCallbacks=D.callbacks.filter(c=>c.status!=='called').length;
   document.getElementById('stats').innerHTML=
+    '<div class="stat"><b>'+newCallbacks+'</b><span>Callback requests to make</span></div>'+
     '<div class="stat"><b>'+pendingPay+'</b><span>Payments awaiting confirmation</span></div>'+
     '<div class="stat"><b>'+D.policies.length+'</b><span>Policies ('+D.policies.filter(p=>p.status!=='pending').length+' active)</span></div>'+
     '<div class="stat"><b>'+openClaims+'</b><span>Open claims</span></div>'+
@@ -211,6 +217,13 @@ function showTab(t){tab=t;document.querySelectorAll('.tab').forEach(b=>b.classLi
 
 function renderTab(){
   const P=document.getElementById('panel');
+  if(tab==='callbacks'){
+    P.innerHTML='<h3>Callback requests</h3>'+(D.callbacks.length?'<table><tr><th>Reference</th><th>Name</th><th>Phone</th><th>Best time</th><th>Reason</th><th>Requested</th><th>Status</th><th></th></tr>'+
+      D.callbacks.filter(matchQ).map(c=>'<tr><td class="mono">'+(c.reference||c.id)+'</td><td>'+(c.name||'—')+(c.is_guest?' <span class="stb pend" style="margin-left:4px;">guest</span>':'')+'</td><td class="mono">'+(c.phone||'—')+'</td><td>'+(c.best_time||'—')+'</td><td>'+(c.context||'—')+'</td><td>'+fmtDate(c.created_at)+'</td>'+
+      '<td><span class="stb '+(c.status==='called'?'act':'pend')+'">'+(c.status==='called'?'Called':'New')+'</span></td>'+
+      '<td style="white-space:nowrap;">'+(c.status!=='called'?'<button class="btn small" onclick="markCallbackCalled(\''+c.id+'\')">Mark called</button> ':'')+'<button class="btn small danger" onclick="delCallback(\''+c.id+'\')">Delete</button></td></tr>').join('')+'</table>':'<div class="empty">No callback requests yet.</div>')+
+      '<div class="note">These come from every "Speak to a broker", "Call Me Back" and "Chat with advisor" button across the site. Call the customer, then mark it as called.</div>';
+  }
   if(tab==='orders'){
     P.innerHTML='<h3>Payments</h3>'+(D.orders.length?'<table><tr><th>Reference</th><th>Customer</th><th>Plan</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th><th></th></tr>'+
       D.orders.filter(matchQ).map(o=>'<tr><td class="mono">'+o.reference+'</td><td>'+userOf(o.user_id,o)+'</td><td>'+(o.plan_name||'—')+'</td><td class="mono">MUR '+(o.amount||0).toLocaleString()+'</td><td>'+(o.method||'—')+'</td><td>'+fmtDate(o.created_at)+'</td>'+
@@ -259,6 +272,17 @@ async function rejectPay(id){
   catch(e){ toast('Error: '+e.message); }
   await refresh();
 }
+async function markCallbackCalled(id){
+  try{ await db.collection('callback_requests').doc(id).update({status:'called'}); toast('Marked as called'); }
+  catch(e){ toast('Error: '+e.message); }
+  await refresh();
+}
+async function delCallback(id){
+  if(!confirm('Permanently delete this callback request? This cannot be undone.'))return;
+  try{ await db.collection('callback_requests').doc(id).delete(); toast('Callback request deleted'); }
+  catch(e){ toast('Error: '+e.message); }
+  await refresh();
+}
 async function activatePolicy(id){
   try{ await db.collection('policies').doc(id).update({status:'active'}); toast('Policy '+id+' activated'); }
   catch(e){ toast('Error: '+e.message); }
@@ -267,7 +291,7 @@ async function activatePolicy(id){
 function matchQ(x){const el=document.getElementById('q');const q=el?el.value.trim().toLowerCase():'';if(!q)return true;return JSON.stringify(x).toLowerCase().includes(q);}
 async function doRefresh(){await refresh();toast('Data refreshed');}
 function exportCSV(){
-  const map={orders:D.orders,policies:D.policies,claims:D.claims,users:D.profiles};
+  const map={callbacks:D.callbacks,orders:D.orders,policies:D.policies,claims:D.claims,users:D.profiles};
   const rows=(map[tab]||[]).filter(matchQ);
   if(!rows.length){toast('Nothing to export');return;}
   const cols=Object.keys(rows[0]);

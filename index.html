@@ -733,8 +733,8 @@ body.dark .illus-banner{color:var(--gold);}
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 /* ═══════════ ACCESS GATE ═══════════ */
 const GATE_KEY='VGVzdDEyMw=='; /* access code (base64) */
@@ -761,15 +761,25 @@ const firebaseConfig={
   messagingSenderId:"824652888791",
   appId:"1:824652888791:web:61465653af1c6bb5e28e92"
 };
-let auth=null, db=null, storage=null, sbUser=null, sbProfile=null, authMode='in', pendingOobCode=null, lastPurchaseId=null;
+let auth=null, db=null, sbUser=null, sbProfile=null, authMode='in', pendingOobCode=null, lastPurchaseId=null;
 try{
   if(firebaseConfig.apiKey!=='YOUR_API_KEY' && window.firebase){
     firebase.initializeApp(firebaseConfig);
     auth=firebase.auth();
     db=firebase.firestore();
-    if(firebase.storage)storage=firebase.storage();
   }
 }catch(e){ console.warn('Firebase init failed:',e); }
+
+/* Claim document storage runs on Supabase Storage (free tier, no card required) —
+   kept separate from Firebase, which still handles accounts/policies/claims data. */
+const SUPABASE_URL='https://suxhfgwffnpnxjfbdqzc.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_kMpotCtRqAg8XC5_olnwow_99bnxAhN';
+let claimStorage=null;
+try{
+  if(window.supabase && window.supabase.createClient){
+    claimStorage=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  }
+}catch(e){ console.warn('Supabase Storage init failed:',e); }
 
 function openAuth(){document.getElementById('auth-ov').classList.add('on');}
 function authTab(m){
@@ -1761,7 +1771,7 @@ async function handleClaimFiles(fileList){
   const listEl=document.getElementById('cl-file-list');
   const files=Array.from(fileList||[]);
   if(!files.length)return;
-  if(!storage){
+  if(!claimStorage){
     if(listEl)listEl.innerHTML='<span style="color:var(--coral);">Document storage isn\'t available right now — you can still submit the claim and send documents separately.</span>';
     return;
   }
@@ -1785,10 +1795,11 @@ async function handleClaimFiles(fileList){
     claimUploadedDocs.push(entry);
     renderClaimFileList();
     try{
-      const path='claim-uploads/'+user.uid+'/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-      const ref=storage.ref().child(path);
-      await ref.put(file);
-      entry.url=await ref.getDownloadURL();
+      const path=user.uid+'/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const {error:upErr}=await claimStorage.storage.from('claim-uploads').upload(path,file,{contentType:file.type,upsert:false});
+      if(upErr)throw upErr;
+      const {data}=claimStorage.storage.from('claim-uploads').getPublicUrl(path);
+      entry.url=data.publicUrl;
       entry.uploading=false;
     }catch(e){
       console.warn('claim file upload failed',e);

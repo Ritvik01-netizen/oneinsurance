@@ -231,8 +231,8 @@ function renderTab(){
       '<td style="white-space:nowrap;">'+(st<3?'<button class="btn small" onclick="advanceClaim(\''+c.ref+'\','+st+')">Move to '+CLAIM_STAGES[st+1]+'</button> ':'')+'<button class="btn small danger" onclick="delClaim(\''+c.ref+'\')">Delete</button></td></tr>';}).join('')+'</table>':'<div class="empty">No claims yet.</div>');
   }
   if(tab==='users'){
-    P.innerHTML='<h3>Customers &amp; team</h3>'+(D.profiles.length?'<table><tr><th>Name</th><th>Email</th><th>Joined</th><th>Policies</th><th>Claims</th><th>Points</th><th>Role</th><th></th></tr>'+
-      D.profiles.filter(matchQ).map(u=>'<tr><td>'+(u.name||'—')+'</td><td class="mono" style="font-size:11.5px;">'+(u.email||'—')+'</td><td>'+fmtDate(u.created_at)+'</td><td class="mono">'+D.policies.filter(p=>p.user_id===u.id).length+'</td><td class="mono">'+D.claims.filter(c=>c.user_id===u.id).length+'</td><td class="mono">'+(u.points||0)+'</td><td>'+(u.is_admin?'<span class="stb act">admin</span>':(u.is_guest?'<span class="stb pend">guest</span>':'customer'))+'</td>'+
+    P.innerHTML='<h3>Customers &amp; team</h3>'+(D.profiles.length?'<table><tr><th>Name</th><th>Email</th><th>Joined</th><th>Policies</th><th>Claims</th><th>Role</th><th></th></tr>'+
+      D.profiles.filter(matchQ).map(u=>'<tr><td>'+(u.name||'—')+'</td><td class="mono" style="font-size:11.5px;">'+(u.email||'—')+'</td><td>'+fmtDate(u.created_at)+'</td><td class="mono">'+D.policies.filter(p=>p.user_id===u.id).length+'</td><td class="mono">'+D.claims.filter(c=>c.user_id===u.id).length+'</td><td>'+(u.is_admin?'<span class="stb act">admin</span>':(u.is_guest?'<span class="stb pend">guest</span>':'customer'))+'</td>'+
       '<td style="white-space:nowrap;">'+
         (u.id===me.id?'<span style="font-size:11px;color:var(--muted);">you</span>':
           (u.is_admin?'<button class="btn small ghost" onclick="setAdmin(\''+u.id+'\',false)">Revoke admin</button>':'<button class="btn small ghost" onclick="setAdmin(\''+u.id+'\',true)">Make admin</button>')+

@@ -238,8 +238,10 @@ function renderTab(){
       '<td style="white-space:nowrap;">'+(p.status==='pending'?'<button class="btn small" onclick="activatePolicy(\''+p.id+'\')">Activate</button> ':'')+'<button class="btn small danger" onclick="delPolicy(\''+p.id+'\')">Delete</button></td></tr>').join('')+'</table>':'<div class="empty">No policies yet.</div>');
   }
   if(tab==='claims'){
-    P.innerHTML='<h3>Claims</h3>'+(D.claims.length?'<table><tr><th>Reference</th><th>Customer</th><th>Policy</th><th>Type</th><th>Amount</th><th>Date</th><th>Stage</th><th></th></tr>'+
-      D.claims.filter(matchQ).map(c=>{const st=c.status||0;return '<tr><td class="mono">'+c.ref+'</td><td>'+userOf(c.user_id,c)+'</td><td>'+(c.policy||'—')+'</td><td>'+(c.type||'—')+'</td><td class="mono">'+(c.amount?'MUR '+c.amount.toLocaleString():'—')+'</td><td>'+fmtDate(c.created_at)+'</td>'+
+    P.innerHTML='<h3>Claims</h3>'+(D.claims.length?'<table><tr><th>Reference</th><th>Customer</th><th>Policy</th><th>Type</th><th>Amount</th><th>Docs</th><th>Date</th><th>Stage</th><th></th></tr>'+
+      D.claims.filter(matchQ).map(c=>{const st=c.status||0;const docs=Array.isArray(c.documents)?c.documents:[];return '<tr><td class="mono">'+c.ref+'</td><td>'+userOf(c.user_id,c)+'</td><td>'+(c.policy||'—')+'</td><td>'+(c.type||'—')+'</td><td class="mono">'+(c.amount?'MUR '+c.amount.toLocaleString():'—')+'</td>'+
+      '<td>'+(docs.length?docs.map((d,i)=>'<a href="'+d.url+'" target="_blank" rel="noopener" style="color:var(--teal);">'+(i+1)+'</a>').join(' '):'—')+'</td>'+
+      '<td>'+fmtDate(c.created_at)+'</td>'+
       '<td><span class="stb '+(st===3?'paid':st===0?'pend':'act')+'">'+CLAIM_STAGES[st]+'</span></td>'+
       '<td style="white-space:nowrap;">'+(st<3?'<button class="btn small" onclick="advanceClaim(\''+c.ref+'\','+st+')">Move to '+CLAIM_STAGES[st+1]+'</button> ':'')+'<button class="btn small danger" onclick="delClaim(\''+c.ref+'\')">Delete</button></td></tr>';}).join('')+'</table>':'<div class="empty">No claims yet.</div>');
   }

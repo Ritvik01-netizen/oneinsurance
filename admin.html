@@ -107,6 +107,7 @@ td .mono{font-size:12px;}
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 /* Paste the same Firebase web config used in index.html below, then redeploy. */
 const firebaseConfig={
@@ -125,6 +126,24 @@ try{
     db=firebase.firestore();
   }
 }catch(e){ console.warn('Firebase init failed:',e); }
+
+/* Same Supabase Storage project as index.html — used only to generate short-lived
+   signed URLs for claim documents, since the bucket is private. */
+const SUPABASE_URL='https://suxhfgwffnpnxjfbdqzc.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_kMpotCtRqAg8XC5_olnwow_99bnxAhN';
+let claimStorage=null;
+try{
+  if(window.supabase && window.supabase.createClient){
+    claimStorage=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  }
+}catch(e){ console.warn('Supabase Storage init failed:',e); }
+async function viewClaimDoc(path){
+  if(!path)return;
+  if(!claimStorage){alert('Document storage unavailable');return;}
+  const {data,error}=await claimStorage.storage.from('claim-uploads').createSignedUrl(path,300);
+  if(error||!data){console.warn('signed url failed',error);alert('Could not open this document — please try again.');return;}
+  window.open(data.signedUrl,'_blank','noopener');
+}
 let me=null, tab='callbacks', D={orders:[],policies:[],claims:[],profiles:[],callbacks:[]};
 function tsMillis(ts){ if(!ts)return 0; if(ts.toMillis)return ts.toMillis(); if(ts.seconds)return ts.seconds*1000; return 0; }
 function tsIso(ts){ const m=tsMillis(ts); return m?new Date(m).toISOString():''; }
@@ -240,7 +259,7 @@ function renderTab(){
   if(tab==='claims'){
     P.innerHTML='<h3>Claims</h3>'+(D.claims.length?'<table><tr><th>Reference</th><th>Customer</th><th>Policy</th><th>Type</th><th>Amount</th><th>Docs</th><th>Date</th><th>Stage</th><th></th></tr>'+
       D.claims.filter(matchQ).map(c=>{const st=c.status||0;const docs=Array.isArray(c.documents)?c.documents:[];return '<tr><td class="mono">'+c.ref+'</td><td>'+userOf(c.user_id,c)+'</td><td>'+(c.policy||'—')+'</td><td>'+(c.type||'—')+'</td><td class="mono">'+(c.amount?'MUR '+c.amount.toLocaleString():'—')+'</td>'+
-      '<td>'+(docs.length?docs.map((d,i)=>'<a href="'+d.url+'" target="_blank" rel="noopener" style="color:var(--teal);">'+(i+1)+'</a>').join(' '):'—')+'</td>'+
+      '<td>'+(docs.length?docs.map((d,i)=>d.path?'<a href="javascript:void(0)" onclick="viewClaimDoc(\''+d.path+'\')" style="color:var(--teal);">'+(i+1)+'</a>':d.url?'<a href="'+d.url+'" target="_blank" rel="noopener" style="color:var(--teal);">'+(i+1)+'</a>':'').join(' '):'—')+'</td>'+
       '<td>'+fmtDate(c.created_at)+'</td>'+
       '<td><span class="stb '+(st===3?'paid':st===0?'pend':'act')+'">'+CLAIM_STAGES[st]+'</span></td>'+
       '<td style="white-space:nowrap;">'+(st<3?'<button class="btn small" onclick="advanceClaim(\''+c.ref+'\','+st+')">Move to '+CLAIM_STAGES[st+1]+'</button> ':'')+'<button class="btn small danger" onclick="delClaim(\''+c.ref+'\')">Delete</button></td></tr>';}).join('')+'</table>':'<div class="empty">No claims yet.</div>');

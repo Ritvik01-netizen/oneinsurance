@@ -109,6 +109,31 @@ td .mono{font-size:12px;}
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+/* ═══════════ SECURITY: HTML-escape every customer-supplied value before it is
+   concatenated into innerHTML. Every table here renders free-text fields
+   submitted by anonymous members of the public (callback requests, checkout
+   names, claim descriptions) — without this, a value like
+   <img src=x onerror=...> would execute as real HTML the moment an admin
+   opens that tab, running with this already-authenticated admin session. ═══════════ */
+function escapeHtml(v){
+  if(v===null||v===undefined)return '';
+  return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+/* For a value placed as the argument of an inline onclick="fn('VALUE')" handler.
+   HTML-escaping a quote alone is NOT enough there: the browser HTML-decodes the
+   attribute's text back to a literal character before compiling it as JS, so an
+   escaped quote still breaks out of the JS string once decoded. Backslash-escape
+   it for JS first, then HTML-escape the result for the surrounding attribute. */
+function escJsAttr(v){
+  return escapeHtml(String(v===null||v===undefined?'':v).replace(/[\\']/g,c=>'\\'+c));
+}
+/* Only ever render a stored value as a real link if it is actually http(s) — a
+   legacy/attacker-supplied "url" field could otherwise contain a javascript: URI. */
+function safeUrl(v){
+  const s=String(v||'');
+  return /^https?:\/\//i.test(s)?s:'';
+}
+
 /* Paste the same Firebase web config used in index.html below, then redeploy. */
 const firebaseConfig={
   apiKey:"AIzaSyBvssVWzBFwkImHDgTWKmOuZ_MV0AarZMA",
@@ -190,7 +215,7 @@ async function enter(user){
   me={uid:user.uid,id:user.uid,email:user.email};
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='block';
-  document.getElementById('head-right').innerHTML='<span class="who">'+(prof.name||user.email)+' · admin</span><button class="btn ghost small" onclick="doLogout()">Sign out</button>';
+  document.getElementById('head-right').innerHTML='<span class="who">'+escapeHtml(prof.name||user.email)+' · admin</span><button class="btn ghost small" onclick="doLogout()">Sign out</button>';
   await refresh();
 }
 async function doLogout(){await auth.signOut();location.reload();}
@@ -214,10 +239,10 @@ function fmtDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'2-digi
 // Prefers the name/email snapshotted directly on the order/policy/claim row (works even if no profile
 // doc exists yet or a guest's contact details changed since), falling back to a profiles lookup, then the uid.
 function userOf(id,row){
-  if(row&&row.customer_name)return row.customer_name+(row.is_guest?' <span class="stb pend" style="margin-left:4px;">guest</span>':'');
+  if(row&&row.customer_name)return escapeHtml(row.customer_name)+(row.is_guest?' <span class="stb pend" style="margin-left:4px;">guest</span>':'');
   const p=D.profiles.find(x=>x.id===id);
-  if(p)return p.name||p.email||id.slice(0,8);
-  return id?id.slice(0,8)+'…':'—';
+  if(p)return escapeHtml(p.name||p.email||id.slice(0,8));
+  return id?escapeHtml(id.slice(0,8))+'…':'—';
 }
 
 function renderStats(){
@@ -238,39 +263,39 @@ function renderTab(){
   const P=document.getElementById('panel');
   if(tab==='callbacks'){
     P.innerHTML='<h3>Callback requests</h3>'+(D.callbacks.length?'<table><tr><th>Reference</th><th>Name</th><th>Phone</th><th>Best time</th><th>Reason</th><th>Requested</th><th>Status</th><th></th></tr>'+
-      D.callbacks.filter(matchQ).map(c=>'<tr><td class="mono">'+(c.reference||c.id)+'</td><td>'+(c.name||'—')+(c.is_guest?' <span class="stb pend" style="margin-left:4px;">guest</span>':'')+'</td><td class="mono">'+(c.phone||'—')+'</td><td>'+(c.best_time||'—')+'</td><td>'+(c.context||'—')+'</td><td>'+fmtDate(c.created_at)+'</td>'+
+      D.callbacks.filter(matchQ).map(c=>'<tr><td class="mono">'+escapeHtml(c.reference||c.id)+'</td><td>'+escapeHtml(c.name||'—')+(c.is_guest?' <span class="stb pend" style="margin-left:4px;">guest</span>':'')+'</td><td class="mono">'+escapeHtml(c.phone||'—')+'</td><td>'+escapeHtml(c.best_time||'—')+'</td><td>'+escapeHtml(c.context||'—')+'</td><td>'+fmtDate(c.created_at)+'</td>'+
       '<td><span class="stb '+(c.status==='called'?'act':'pend')+'">'+(c.status==='called'?'Called':'New')+'</span></td>'+
-      '<td style="white-space:nowrap;">'+(c.status!=='called'?'<button class="btn small" onclick="markCallbackCalled(\''+c.id+'\')">Mark called</button> ':'')+'<button class="btn small danger" onclick="delCallback(\''+c.id+'\')">Delete</button></td></tr>').join('')+'</table>':'<div class="empty">No callback requests yet.</div>')+
+      '<td style="white-space:nowrap;">'+(c.status!=='called'?'<button class="btn small" onclick="markCallbackCalled(\''+escJsAttr(c.id)+'\')">Mark called</button> ':'')+'<button class="btn small danger" onclick="delCallback(\''+escJsAttr(c.id)+'\')">Delete</button></td></tr>').join('')+'</table>':'<div class="empty">No callback requests yet.</div>')+
       '<div class="note">These come from every "Speak to a broker", "Call Me Back" and "Chat with advisor" button across the site. Call the customer, then mark it as called.</div>';
   }
   if(tab==='orders'){
     P.innerHTML='<h3>Payments</h3>'+(D.orders.length?'<table><tr><th>Reference</th><th>Customer</th><th>Plan</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th><th></th></tr>'+
-      D.orders.filter(matchQ).map(o=>'<tr><td class="mono">'+o.reference+'</td><td>'+userOf(o.user_id,o)+'</td><td>'+(o.plan_name||'—')+'</td><td class="mono">MUR '+(o.amount||0).toLocaleString()+'</td><td>'+(o.method||'—')+'</td><td>'+fmtDate(o.created_at)+'</td>'+
-      '<td><span class="stb '+(o.status==='paid'?'paid':o.status==='rejected'?'rej':'pend')+'">'+o.status+'</span></td>'+
-      '<td style="white-space:nowrap;">'+(o.status==='pending'?'<button class="btn small" onclick="confirmPay(\''+o.id+'\')">Confirm payment</button> <button class="btn small ghost" onclick="rejectPay(\''+o.id+'\')">Reject</button> ':'')+'<button class="btn small danger" onclick="delOrder(\''+o.id+'\')">Delete</button></td></tr>').join('')+'</table>':'<div class="empty">No payments yet.</div>')+
+      D.orders.filter(matchQ).map(o=>'<tr><td class="mono">'+escapeHtml(o.reference)+'</td><td>'+userOf(o.user_id,o)+'</td><td>'+escapeHtml(o.plan_name||'—')+'</td><td class="mono">MUR '+(o.amount||0).toLocaleString()+'</td><td>'+escapeHtml(o.method||'—')+'</td><td>'+fmtDate(o.created_at)+'</td>'+
+      '<td><span class="stb '+(o.status==='paid'?'paid':o.status==='rejected'?'rej':'pend')+'">'+escapeHtml(o.status)+'</span></td>'+
+      '<td style="white-space:nowrap;">'+(o.status==='pending'?'<button class="btn small" onclick="confirmPay(\''+escJsAttr(o.id)+'\')">Confirm payment</button> <button class="btn small ghost" onclick="rejectPay(\''+escJsAttr(o.id)+'\')">Reject</button> ':'')+'<button class="btn small danger" onclick="delOrder(\''+escJsAttr(o.id)+'\')">Delete</button></td></tr>').join('')+'</table>':'<div class="empty">No payments yet.</div>')+
       '<div class="note">Confirming a payment marks the order as paid and activates the linked policy — the customer sees it turn Active immediately.</div>';
   }
   if(tab==='policies'){
     P.innerHTML='<h3>Policies</h3>'+(D.policies.length?'<table><tr><th>Policy N°</th><th>Customer</th><th>Plan</th><th>Insurer</th><th>Premium</th><th>Type</th><th>Renews</th><th>Status</th><th></th></tr>'+
-      D.policies.filter(matchQ).map(p=>'<tr><td class="mono">'+p.id+'</td><td>'+userOf(p.user_id,p)+'</td><td>'+p.name+'</td><td>'+(p.insurer||'—')+'</td><td class="mono">MUR '+(p.price||0).toLocaleString()+'/mo</td><td>'+(p.type||'—')+'</td><td>'+(p.renews||'—')+'</td>'+
-      '<td><span class="stb '+(p.status==='pending'?'pend':'act')+'">'+(p.status||'active')+'</span></td>'+
-      '<td style="white-space:nowrap;">'+(p.status==='pending'?'<button class="btn small" onclick="activatePolicy(\''+p.id+'\')">Activate</button> ':'')+'<button class="btn small danger" onclick="delPolicy(\''+p.id+'\')">Delete</button></td></tr>').join('')+'</table>':'<div class="empty">No policies yet.</div>');
+      D.policies.filter(matchQ).map(p=>'<tr><td class="mono">'+escapeHtml(p.id)+'</td><td>'+userOf(p.user_id,p)+'</td><td>'+escapeHtml(p.name)+'</td><td>'+escapeHtml(p.insurer||'—')+'</td><td class="mono">MUR '+(p.price||0).toLocaleString()+'/mo</td><td>'+escapeHtml(p.type||'—')+'</td><td>'+escapeHtml(p.renews||'—')+'</td>'+
+      '<td><span class="stb '+(p.status==='pending'?'pend':'act')+'">'+escapeHtml(p.status||'active')+'</span></td>'+
+      '<td style="white-space:nowrap;">'+(p.status==='pending'?'<button class="btn small" onclick="activatePolicy(\''+escJsAttr(p.id)+'\')">Activate</button> ':'')+'<button class="btn small danger" onclick="delPolicy(\''+escJsAttr(p.id)+'\')">Delete</button></td></tr>').join('')+'</table>':'<div class="empty">No policies yet.</div>');
   }
   if(tab==='claims'){
     P.innerHTML='<h3>Claims</h3>'+(D.claims.length?'<table><tr><th>Reference</th><th>Customer</th><th>Policy</th><th>Type</th><th>Amount</th><th>Docs</th><th>Date</th><th>Stage</th><th></th></tr>'+
-      D.claims.filter(matchQ).map(c=>{const st=c.status||0;const docs=Array.isArray(c.documents)?c.documents:[];return '<tr><td class="mono">'+c.ref+'</td><td>'+userOf(c.user_id,c)+'</td><td>'+(c.policy||'—')+'</td><td>'+(c.type||'—')+'</td><td class="mono">'+(c.amount?'MUR '+c.amount.toLocaleString():'—')+'</td>'+
-      '<td>'+(docs.length?docs.map((d,i)=>d.path?'<a href="javascript:void(0)" onclick="viewClaimDoc(\''+d.path+'\')" style="color:var(--teal);">'+(i+1)+'</a>':d.url?'<a href="'+d.url+'" target="_blank" rel="noopener" style="color:var(--teal);">'+(i+1)+'</a>':'').join(' '):'—')+'</td>'+
+      D.claims.filter(matchQ).map(c=>{const st=c.status||0;const docs=Array.isArray(c.documents)?c.documents:[];return '<tr><td class="mono">'+escapeHtml(c.ref)+'</td><td>'+userOf(c.user_id,c)+'</td><td>'+escapeHtml(c.policy||'—')+'</td><td>'+escapeHtml(c.type||'—')+'</td><td class="mono">'+(c.amount?'MUR '+c.amount.toLocaleString():'—')+'</td>'+
+      '<td>'+(docs.length?docs.map((d,i)=>d.path?'<a href="javascript:void(0)" onclick="viewClaimDoc(\''+escJsAttr(d.path)+'\')" style="color:var(--teal);">'+(i+1)+'</a>':safeUrl(d.url)?'<a href="'+escapeHtml(safeUrl(d.url))+'" target="_blank" rel="noopener" style="color:var(--teal);">'+(i+1)+'</a>':'').join(' '):'—')+'</td>'+
       '<td>'+fmtDate(c.created_at)+'</td>'+
-      '<td><span class="stb '+(st===3?'paid':st===0?'pend':'act')+'">'+CLAIM_STAGES[st]+'</span></td>'+
-      '<td style="white-space:nowrap;">'+(st<3?'<button class="btn small" onclick="advanceClaim(\''+c.ref+'\','+st+')">Move to '+CLAIM_STAGES[st+1]+'</button> ':'')+'<button class="btn small danger" onclick="delClaim(\''+c.ref+'\')">Delete</button></td></tr>';}).join('')+'</table>':'<div class="empty">No claims yet.</div>');
+      '<td><span class="stb '+(st===3?'paid':st===0?'pend':'act')+'">'+escapeHtml(CLAIM_STAGES[st])+'</span></td>'+
+      '<td style="white-space:nowrap;">'+(st<3?'<button class="btn small" onclick="advanceClaim(\''+escJsAttr(c.ref)+'\','+st+')">Move to '+escapeHtml(CLAIM_STAGES[st+1])+'</button> ':'')+'<button class="btn small danger" onclick="delClaim(\''+escJsAttr(c.ref)+'\')">Delete</button></td></tr>';}).join('')+'</table>':'<div class="empty">No claims yet.</div>');
   }
   if(tab==='users'){
     P.innerHTML='<h3>Customers &amp; team</h3>'+(D.profiles.length?'<table><tr><th>Name</th><th>Email</th><th>Joined</th><th>Policies</th><th>Claims</th><th>Role</th><th></th></tr>'+
-      D.profiles.filter(matchQ).map(u=>'<tr><td>'+(u.name||'—')+'</td><td class="mono" style="font-size:11.5px;">'+(u.email||'—')+'</td><td>'+fmtDate(u.created_at)+'</td><td class="mono">'+D.policies.filter(p=>p.user_id===u.id).length+'</td><td class="mono">'+D.claims.filter(c=>c.user_id===u.id).length+'</td><td>'+(u.is_admin?'<span class="stb act">admin</span>':(u.is_guest?'<span class="stb pend">guest</span>':'customer'))+'</td>'+
+      D.profiles.filter(matchQ).map(u=>'<tr><td>'+escapeHtml(u.name||'—')+'</td><td class="mono" style="font-size:11.5px;">'+escapeHtml(u.email||'—')+'</td><td>'+fmtDate(u.created_at)+'</td><td class="mono">'+D.policies.filter(p=>p.user_id===u.id).length+'</td><td class="mono">'+D.claims.filter(c=>c.user_id===u.id).length+'</td><td>'+(u.is_admin?'<span class="stb act">admin</span>':(u.is_guest?'<span class="stb pend">guest</span>':'customer'))+'</td>'+
       '<td style="white-space:nowrap;">'+
         (u.id===me.id?'<span style="font-size:11px;color:var(--muted);">you</span>':
-          (u.is_admin?'<button class="btn small ghost" onclick="setAdmin(\''+u.id+'\',false)">Revoke admin</button>':'<button class="btn small ghost" onclick="setAdmin(\''+u.id+'\',true)">Make admin</button>')+
-          (u.email?' <button class="btn small ghost" onclick="sendReset(\''+u.email+'\')">Send password reset</button>':''))+
+          (u.is_admin?'<button class="btn small ghost" onclick="setAdmin(\''+escJsAttr(u.id)+'\',false)">Revoke admin</button>':'<button class="btn small ghost" onclick="setAdmin(\''+escJsAttr(u.id)+'\',true)">Make admin</button>')+
+          (u.email?' <button class="btn small ghost" onclick="sendReset(\''+escJsAttr(u.email)+'\')">Send password reset</button>':''))+
       '</td></tr>').join('')+'</table>':'<div class="empty">No customers yet.</div>')+
       '<div class="note">Make admin gives that account full access to this panel — grant it only to people you trust. Send password reset emails the user a secure link to choose a new password; nobody ever sees or types anyone else\'s password.</div>';
   }

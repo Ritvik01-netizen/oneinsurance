@@ -1,0 +1,186 @@
+rules_version = '2';
+
+// ONEInsurance — Firestore Security Rules
+// ─────────────────────────────────────────────────────────────────────────
+// Why this file exists: the client-side `maxlength`/escaping fixes in
+// index.html and admin.html stop normal users from triggering stored XSS
+// through the UI, but they do NOT stop an attacker who opens devtools and
+// calls the already-loaded Firebase SDK directly (db.collection(...).set(...))
+// to write arbitrary field values straight into the database. These rules
+// are the one place that bypass can't get around, because they run on
+// Firestore's servers, not in the attacker's browser.
+//
+// Schema / admin model (reverse-engineered from index.html + admin.html):
+//   - profiles/{uid}        : one per user. is_admin flag gates admin.html.
+//   - policies/{policyId}   : created by a customer at checkout (status:'pending'),
+//                             only an admin ever flips status -> 'active' etc.
+//   - orders/{orderRef}     : created alongside a policy (status:'pending'),
+//                             only an admin ever marks 'paid'/'rejected'.
+//   - claims/{claimRef}     : created by a customer (status:0), only an
+//                             admin ever advances the status.
+//   - callback_requests/{id}: created by a customer (status:'new'), only an
+//                             admin ever marks 'called'.
+// ─────────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    // Admin = a profile doc that already has is_admin == true. This mirrors
+    // exactly what admin.html itself checks client-side (see enter()), but
+    // enforced server-side where it can't be spoofed.
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.is_admin == true;
+    }
+    function isStr(v, maxLen) {
+      return v is string && v.size() <= maxLen;
+    }
+    function isOptStr(v, maxLen) {
+      return v == null || isStr(v, maxLen);
+    }
+    function isNum(v) {
+      return v is int || v is float;
+    }
+
+    // ── profiles ─────────────────────────────────────────────────────────
+    match /profiles/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+
+      // A user may only ever create THEIR OWN profile, and it must start
+      // as a non-admin profile — nobody can self-promote by writing
+      // is_admin:true on creation.
+      allow create: if isOwner(uid)
+        && request.resource.data.is_admin == false
+        && isOptStr(request.resource.data.name, 100)
+        && isOptStr(request.resource.data.email, 150)
+        && isOptStr(request.resource.data.phone, 30);
+
+      // Owner can update their own contact details, but can NEVER change
+      // their own is_admin flag (blocks the privilege-escalation path a
+      // devtools write would otherwise have). An admin may flip is_admin
+      // on ANY profile (this is what admin.html's "setAdmin" button does)
+      // but may not touch any other field while doing it.
+      allow update: if
+        (isOwner(uid)
+          && request.resource.data.is_admin == resource.data.is_admin
+          && isOptStr(request.resource.data.name, 100)
+          && isOptStr(request.resource.data.email, 150)
+          && isOptStr(request.resource.data.phone, 30))
+        ||
+        (isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['is_admin']));
+
+      allow delete: if false;
+    }
+
+    // ── policies ─────────────────────────────────────────────────────────
+    match /policies/{policyId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.user_id == request.auth.uid);
+
+      allow create: if isSignedIn()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && isStr(request.resource.data.customer_name, 120)
+        && isStr(request.resource.data.customer_email, 150)
+        && isStr(request.resource.data.customer_phone, 30)
+        && isStr(request.resource.data.name, 150)
+        && isStr(request.resource.data.insurer, 20)
+        && isStr(request.resource.data.type, 40)
+        && isOptStr(request.resource.data.reg, 30)
+        && isOptStr(request.resource.data.model, 80)
+        && isOptStr(request.resource.data.cover, 200)
+        && isOptStr(request.resource.data.nid_passport, 40)
+        && isOptStr(request.resource.data.address, 220)
+        && isOptStr(request.resource.data.district, 60)
+        && isOptStr(request.resource.data.city, 60)
+        && isOptStr(request.resource.data.renews, 30)
+        && isNum(request.resource.data.price);
+
+      // Only admin.html ever changes a policy after creation (activate / delete-equivalent edits).
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── orders ───────────────────────────────────────────────────────────
+    match /orders/{orderId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.user_id == request.auth.uid);
+
+      allow create: if isSignedIn()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && isStr(request.resource.data.customer_name, 120)
+        && isStr(request.resource.data.customer_email, 150)
+        && isStr(request.resource.data.customer_phone, 30)
+        && isStr(request.resource.data.policy_id, 40)
+        && isStr(request.resource.data.plan_name, 150)
+        && isStr(request.resource.data.method, 40)
+        && isStr(request.resource.data.reference, 40)
+        && isNum(request.resource.data.amount);
+
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── claims ───────────────────────────────────────────────────────────
+    match /claims/{claimRef} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.user_id == request.auth.uid);
+
+      allow create: if isSignedIn()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.status == 0
+        && isStr(request.resource.data.policy, 150)
+        && isStr(request.resource.data.insurer, 20)
+        // Only the 6 claim-type strings the UI actually offers — blocks an
+        // attacker from writing an arbitrary/huge "type" value directly.
+        && request.resource.data.type in [
+             'Accident / Collision', 'Theft / Burglary', 'Cyclone / Weather',
+             'Medical / Hospital', 'Travel Incident', 'Other'
+           ]
+        && isNum(request.resource.data.amount)
+        && request.resource.data.amount >= 0
+        && request.resource.data.amount <= 100000000
+        && isStr(request.resource.data.descr, 600)
+        && request.resource.data.documents is list
+        && request.resource.data.documents.size() <= 10;
+
+      // admin.html only ever advances the status field (advanceClaim) — nothing else.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      allow delete: if isAdmin();
+    }
+
+    // ── callback_requests ────────────────────────────────────────────────
+    match /callback_requests/{cbId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.user_id == request.auth.uid);
+
+      allow create: if isSignedIn()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.status == 'new'
+        && isStr(request.resource.data.reference, 20)
+        && isStr(request.resource.data.name, 100)
+        && isStr(request.resource.data.phone, 30)
+        && isOptStr(request.resource.data.best_time, 40)
+        && isOptStr(request.resource.data.context, 300);
+
+      // admin.html only ever flips status to 'called' (markCallbackCalled).
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      allow delete: if isAdmin();
+    }
+
+    // ── default deny ─────────────────────────────────────────────────────
+    // Anything not explicitly matched above (including any future/unknown
+    // collection) is denied by default rather than silently open.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
